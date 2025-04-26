@@ -6,10 +6,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
+// CORS configuration
 app.use(cors({
-  origin: 'https://the-news-ledger-frontend.onrender.com', // <-- your frontend Render URL
-  credentials: true,
+  origin: 'https://the-news-ledger-frontend.onrender.com', // your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // ensure these methods are allowed
+  allowedHeaders: ['Content-Type', 'Authorization'], // specify allowed headers
+  credentials: true, // if you're using cookies or authorization headers
 }));
+
+// For preflight requests (OPTIONS request)
+app.options('*', cors());
+
 app.use(express.json()); // for JSON body parsing
 
 const mongoURI = 'mongodb+srv://Sandeepnnishad638672:s20220020309@cluster0.rjm30.mongodb.net/newsAuth?retryWrites=true&w=majority&appName=Cluster0';
