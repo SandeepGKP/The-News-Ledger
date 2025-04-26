@@ -10,7 +10,9 @@ const Login = ({ onLogin }) => {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('https://the-news-ledger-1.onrender.com/api/login', { username, password });
+      const res = await axios.post('https://the-news-ledger-1.onrender.com/api/login', 
+         { username, password }, 
+         { withCredentials: true } );
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('token', res.data.token);
       onLogin();
