@@ -6,7 +6,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: 'https://the-news-ledger-frontend.onrender.com',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
+
 app.use(express.json()); // for JSON body parsing
 
 const mongoURI = 'mongodb+srv://Sandeepnnishad638672:s20220020309@cluster0.rjm30.mongodb.net/newsAuth?retryWrites=true&w=majority&appName=Cluster0';
