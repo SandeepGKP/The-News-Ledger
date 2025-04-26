@@ -19,7 +19,8 @@ export default function Home() {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      let url = `https://the-news-ledger-1.onrender.com/api/news?category=${category}&country=${country}&page=${page}`;
+      // let url = `http://localhost:5000/api/news?category=${category}&country=${country}&page=${page}`;
+      let url = `https://the-news-ledger.onrender.com/api/news?category=${category}&country=${country}&page=${page}`;
       if (query.trim()) {
         url += `&q=${encodeURIComponent(query.trim())}`;
       }

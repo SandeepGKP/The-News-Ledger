@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 
+// app.use(cors({ origin : 'https://the-news-ledger-frontend.onrender.com/'}));
+// app.use(cors({ origin : 'http://localhost:3000'}));
 app.use(cors());
 
 
