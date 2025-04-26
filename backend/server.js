@@ -6,26 +6,33 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-// CORS configuration
-app.use(cors({
-  origin: 'https://the-news-ledger-frontend.onrender.com', // your frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // ensure these methods are allowed
-  allowedHeaders: ['Content-Type', 'Authorization'], // specify allowed headers
-  credentials: true, // if you're using cookies or authorization headers
-}));
-
-// For preflight requests (OPTIONS request)
-app.options('*', cors());
-
 app.use(express.json()); // for JSON body parsing
 
+// CORS Configuration - placed here before route handlers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://the-news-ledger-frontend.onrender.com'); // frontend URL
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'); // methods allowed
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // allowed headers
+  next();
+});
+
+// CORS middleware to handle preflight requests
+app.options('*', cors());
+
+// Set up CORS using the `cors` package (optional, but often needed for API calls)
+app.use(cors({
+  origin: 'https://the-news-ledger-frontend.onrender.com', // frontend URL
+  credentials: true, // Allow credentials (cookies, authorization headers)
+}));
+
+// MongoDB Connection
 const mongoURI = 'mongodb+srv://Sandeepnnishad638672:s20220020309@cluster0.rjm30.mongodb.net/newsAuth?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(mongoURI)
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// JWT secret
+// JWT secret key
 const JWT_SECRET = 'your_jwt_secret_key_here';
 
 // User Schema
@@ -78,7 +85,6 @@ app.get('/api/news', async (req, res) => {
     console.error('API Error:', error.response?.data || error.message);
     res.status(500).json({ error: 'Failed to fetch news', details: error.response?.data || error.message });
   }
-  
 });
 
 const PORT = process.env.PORT || 5000;
