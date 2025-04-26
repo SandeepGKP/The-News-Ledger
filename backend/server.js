@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors({
-  origin: 'https://the-news-ledger.vercel.app/', // your frontend URL
+  origin: 'https://the-news-ledger.vercel.app', // your frontend URL
   credentials: true,
 }));
 app.use(express.json()); // for JSON body parsing
