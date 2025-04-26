@@ -7,11 +7,19 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
-// CORS configuration - allow frontend to access backend
-app.use(cors({
-  origin: 'https://the-news-ledger-frontend.onrender.com', // Your frontend Render URL
+// CORS Configuration - allow frontend to access backend
+const corsOptions = {
+  origin: 'https://the-news-ledger-frontend.onrender.com', // Frontend URL
   credentials: true, // Allow credentials like cookies
-}));
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Middleware to handle CORS errors for all other routes (generic handler for OPTIONS preflight)
+app.options('*', cors(corsOptions)); // Handle preflight requests
 
 app.use(express.json()); // To parse JSON body
 
@@ -89,14 +97,6 @@ app.get('/api/news', async (req, res) => {
     console.error('API Error:', error.response?.data || error.message);
     res.status(500).json({ error: 'Failed to fetch news', details: error.response?.data || error.message });
   }
-});
-
-// Middleware to handle CORS errors for all other routes (generic handler for OPTIONS preflight)
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://the-news-ledger-frontend.onrender.com'); // Frontend URL
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'); // Allowed methods
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allowed headers
-  next();
 });
 
 // Start server on specified port (using 5000 or environment variable)
