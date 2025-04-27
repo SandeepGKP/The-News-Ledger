@@ -19,7 +19,8 @@ const Login = ({ onLogin }) => {
       onLogin();
       navigate('/home');
     } catch (err) {
-      alert('Login failed');
+      console.error("Login failed: ", err);
+      navigate('/signup');  // Navigate to signup page if login fails
     }
   };
 

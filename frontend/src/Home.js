@@ -13,13 +13,13 @@ export default function Home() {
   const [country, setCountry] = useState('in');
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
+  const [bookmarks, setBookmarks] = useState([]);
 
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
   const fetchNews = async () => {
     setLoading(true);
     try {
-      // let url = `http://localhost:5000/api/news?category=${category}&country=${country}&page=${page}`;
       let url = `https://the-news-ledger.onrender.com/api/news?category=${category}&country=${country}&page=${page}`;
       if (query.trim()) {
         url += `&q=${encodeURIComponent(query.trim())}`;
@@ -38,6 +38,12 @@ export default function Home() {
     fetchNews();
   }, [category, country, page]);
 
+  // Fetch bookmarks from localStorage on page load
+  useEffect(() => {
+    const storedBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    setBookmarks(storedBookmarks);
+  }, []);
+
   useEffect(() => {
     if (transcript !== '' && listening === false) {
       setQuery(transcript);
@@ -46,12 +52,19 @@ export default function Home() {
   }, [transcript, listening]);
 
   const handleBookmark = (article) => {
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-    const exists = bookmarks.find((a) => a.url === article.url);
+    const existingBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    const exists = existingBookmarks.find((a) => a.url === article.url);
     if (!exists) {
-      bookmarks.push(article);
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      const updatedBookmarks = [article, ...existingBookmarks];
+      localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+      setBookmarks(updatedBookmarks); // Update the bookmarks state immediately
     }
+  };
+
+  const handleRemoveBookmark = (article) => {
+    const updatedBookmarks = bookmarks.filter((a) => a.url !== article.url);
+    localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+    setBookmarks(updatedBookmarks); // Update the bookmarks state after removal
   };
 
   const handleView = (url) => {
@@ -123,6 +136,42 @@ export default function Home() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {/* Bookmarked Articles on Top */}
+          {bookmarks.length > 0 && (
+            <div className="col-span-full mb-4">
+              <h2 className="font-bold text-xl">Bookmarked Articles</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {bookmarks.map((article, idx) => (
+                  <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+                    {article.urlToImage && (
+                      <img src={article.urlToImage} alt="News" className="rounded w-full h-48 object-cover" />
+                    )}
+                    <h2 className="font-bold text-lg mt-2">{article.title}</h2>
+                    <p className="text-sm mt-1 text-gray-600 dark:text-gray-300">{article.description}</p>
+                    <a
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 mt-2 inline-block"
+                      onClick={() => handleView(article.url)}
+                    >
+                      Read More
+                    </a>
+                    <div className="mt-2">
+                      <button
+                        onClick={() => handleRemoveBookmark(article)}
+                        className="text-sm text-red-600"
+                      >
+                        ❌ Remove Bookmark
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Regular News Articles */}
           {news.map((article, idx) => (
             <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
               {article.urlToImage && (
