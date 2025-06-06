@@ -21,7 +21,7 @@ const Root = () => {
     setLoading(false); // Done checking login
   }, []);
 
-  if (loading) return null; // Prevent premature redirect
+  if (loading) return null; // Prevent premature redirect //
 
   return (
     <Router>
