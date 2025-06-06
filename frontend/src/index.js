@@ -11,13 +11,17 @@ const Root = () => {
   const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
+    if (!sessionStorage.getItem('visited')) {
+      localStorage.removeItem('isLoggedIn');
+      sessionStorage.setItem('visited', 'true');
+    }
+
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(loggedIn);
-    setLoading(false);
+    setLoading(false); // Done checking login
   }, []);
 
-
-  if (loading) return null; // Prevent premature redirect //
+  if (loading) return null; // Prevent premature redirect
 
   return (
     <Router>
