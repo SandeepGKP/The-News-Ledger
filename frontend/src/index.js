@@ -4,20 +4,24 @@ import './index.css';
 import App from './App';
 import Login from './login';
 import Signup from './Signup';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 const Root = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true); // Add loading state
 
-  // Clear login on app load (first visit only)
   useEffect(() => {
     if (!sessionStorage.getItem('visited')) {
       localStorage.removeItem('isLoggedIn');
       sessionStorage.setItem('visited', 'true');
     }
 
-    setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(loggedIn);
+    setLoading(false); // Done checking login
   }, []);
+
+  if (loading) return null; // Prevent premature redirect
 
   return (
     <Router>

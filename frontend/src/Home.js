@@ -21,9 +21,12 @@ export default function Home() {
     setLoading(true);
     try {
       let url = `https://the-news-ledger.onrender.com/api/news?category=${category}&country=${country}&page=${page}`;
+      
+      // Use query to fetch relevant articles based on title and content
       if (query.trim()) {
-        url += `&q=${encodeURIComponent(query.trim())}`;
+        url += `&q=${encodeURIComponent(query.trim())}`; // Search query will be passed here for title/content-based filtering
       }
+      
       const res = await axios.get(url);
       console.log(res.data);
       setNews(res.data.articles);
@@ -34,9 +37,10 @@ export default function Home() {
     }
   };
 
+  // Fetch news when the category, country, page, or query changes
   useEffect(() => {
     fetchNews();
-  }, [category, country, page]);
+  }, [category, country, page, query]); // Trigger fetch when any of these change
 
   // Fetch bookmarks from localStorage on page load
   useEffect(() => {
@@ -47,7 +51,7 @@ export default function Home() {
   useEffect(() => {
     if (transcript !== '' && listening === false) {
       setQuery(transcript);
-      fetchNews();
+      fetchNews(); // Fetch news after voice search is completed
     }
   }, [transcript, listening]);
 
@@ -132,7 +136,7 @@ export default function Home() {
         </div>
       ) : news.length === 0 ? (
         <div className="text-center text-yellow-500 mt-10 text-xl">
-          No article found! 😕
+          No article found matching your search! 😕
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
