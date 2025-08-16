@@ -209,10 +209,21 @@ export default function Home() {
         </div>
       )}
 
-      <div className="mt-4 flex justify-center gap-4 items-center sticky top-0 z-50 bg-inherit py-2">
-        <button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} className="px-3 py-1 bg-gray-700 text-white rounded">⬅️ Prev</button>
-        <span className="px-3 py-1 bg-gray-700 text-white rounded">Page {page}</span>
-        <button onClick={() => setPage((prev) => prev + 1)} className="px-3 py-1 bg-gray-700 text-white rounded">Next ➡️</button>
+      <div className="mt-4 flex justify-center gap-2 items-center sticky top-0 z-50 bg-inherit py-2">
+        <button
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          className="px-1 py-1 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={page === 1}
+        >
+          ⬅️
+        </button>
+        <span className="px-4 py-1 bg-gray-700 text-white rounded-md">{page}</span>
+        <button
+          onClick={() => setPage((prev) => prev + 1)}
+          className="px-1 py-1 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors duration-200"
+        >
+          ➡️
+        </button>
       </div>
     </div>
   );

@@ -15,14 +15,13 @@ app.use(cors());
 
 app.use(express.json()); // for JSON body parsing
 
-const mongoURI = 'mongodb+srv://Sandeepnnishad638672:s20220020309@cluster0.rjm30.mongodb.net/newsAuth?retryWrites=true&w=majority&appName=Cluster0';
-
+const mongoURI = process.env.mongoURI ;
 mongoose.connect(mongoURI)
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch(err => console.error('MongoDB connection error:', err));
 
 // JWT secret
-const JWT_SECRET = 'your_jwt_secret_key_here';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // User Schema
 const UserSchema = new mongoose.Schema({
