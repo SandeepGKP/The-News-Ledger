@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useCallback } from 'react';
 import axios from 'axios';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { ToastContainer,toast } from "react-toastify";
 
 const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
 
@@ -17,16 +18,15 @@ export default function Home() {
 
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     setLoading(true);
     try {
       let url = `https://the-news-ledger.onrender.com/api/news?category=${category}&country=${country}&page=${page}`;
-      
-      // Use query to fetch relevant articles based on title and content
+
       if (query.trim()) {
-        url += `&q=${encodeURIComponent(query.trim())}`; // Search query will be passed here for title/content-based filtering
+        url += `&q=${encodeURIComponent(query.trim())}`;
       }
-      
+
       const res = await axios.get(url);
       console.log(res.data);
       setNews(res.data.articles);
@@ -35,25 +35,27 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [category, country, page, query]); // deps moved here
 
-  // Fetch news when the category, country, page, or query changes
+  // Fetch news when category/country/page/query change
   useEffect(() => {
     fetchNews();
-  }, [category, country, page, query]); // Trigger fetch when any of these change
+  }, [fetchNews]);
 
   // Fetch bookmarks from localStorage on page load
   useEffect(() => {
-    const storedBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    const storedBookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
     setBookmarks(storedBookmarks);
   }, []);
 
+  // Voice search handling
   useEffect(() => {
-    if (transcript !== '' && listening === false) {
+    if (transcript !== "" && listening === false) {
       setQuery(transcript);
-      fetchNews(); // Fetch news after voice search is completed
+      fetchNews();
     }
-  }, [transcript, listening]);
+  }, [transcript, listening, fetchNews]); // include fetchNews
+
 
   const handleBookmark = (article) => {
     const existingBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
@@ -62,6 +64,7 @@ export default function Home() {
       const updatedBookmarks = [article, ...existingBookmarks];
       localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
       setBookmarks(updatedBookmarks); // Update the bookmarks state immediately
+      toast.success("Article bookmarked successfully!");
     }
   };
 
@@ -69,6 +72,7 @@ export default function Home() {
     const updatedBookmarks = bookmarks.filter((a) => a.url !== article.url);
     localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
     setBookmarks(updatedBookmarks); // Update the bookmarks state after removal
+    toast.success("Bookmark removed successfully!");
   };
 
   const handleView = (url) => {
@@ -92,6 +96,7 @@ export default function Home() {
 
   return (
     <div className="p-4">
+      <ToastContainer />
       <div className="sticky top-10 z-40 bg-inherit py-1">
         <div className="flex flex-wrap gap-2">
           <input
@@ -181,7 +186,7 @@ export default function Home() {
               {article.urlToImage && (
                 <img src={article.urlToImage} alt="News" className="rounded w-full h-48 object-cover" />
               )}
-              <h2 className="font-bold text-lg mt-2">{article.title}</h2>
+              <h2 className="font-bold text-lg mt-2 text-white">{article.title}</h2>
               <p className="text-sm mt-1 text-gray-600 dark:text-gray-300">{article.description}</p>
               <a
                 href={article.url}

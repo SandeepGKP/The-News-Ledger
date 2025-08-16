@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
+import { ToastContainer,toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function Signup() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +22,7 @@ function Signup() {
       });
       const data = await res.json();
       if (res.ok) {
-        alert('Signup successful');
+        toast.success("Signup successful! You can now login.");
         navigate('/login');
       } else {
         alert(data.message);
@@ -33,6 +34,7 @@ function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-500 to-blue-400">
+      <ToastContainer />
       <div className="bg-white rounded-xl shadow-lg w-full max-w-4xl flex overflow-hidden">
         {/* Left Side */}
         <div className="w-1/2 bg-gradient-to-b from-sky-300 to-sky-500 p-10 text-white flex flex-col justify-between">

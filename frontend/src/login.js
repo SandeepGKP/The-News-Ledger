@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-
+import { ToastContainer,toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -12,6 +13,7 @@ const Login = ({ onLogin }) => {
     try {
       const res = await axios.post('https://the-news-ledger.onrender.com/api/login', 
         { username, password } );
+        toast.success("Login successful!");
         // const res = await axios.post('http://localhost:5000/api/login', 
         //   { username, password } );
       localStorage.setItem('isLoggedIn', 'true');
@@ -26,6 +28,7 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 to-blue-400">
+      <ToastContainer />
       <div className="flex w-[900px] h-[500px] rounded-2xl shadow-lg overflow-hidden bg-white">
         
         {/* Left Panel */}
