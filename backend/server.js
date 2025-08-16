@@ -68,11 +68,12 @@ app.get('/api/news', async (req, res) => {
   }
 
   try {
+    console.log('Fetching news from URL:', url); // Log the URL
     const response = await axios.get(url);
     res.json(response.data);
   } catch (error) {
-    console.error('API Error:', error.response?.data || error.message);
-    res.status(500).json({ error: 'Failed to fetch news', details: error.response?.data || error.message });
+    console.error('API Error:', error.response ? error.response.data : error.message); // Log full error response
+    res.status(500).json({ error: 'Failed to fetch news', details: error.response ? error.response.data : error.message });
   }
   
 });

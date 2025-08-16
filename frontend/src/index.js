@@ -16,8 +16,7 @@ const Root = () => {
       sessionStorage.setItem('visited', 'true');
     }
 
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    setIsLoggedIn(loggedIn);
+    setIsLoggedIn(true); // Temporarily set to true for testing
     setLoading(false); // Done checking login
   }, []);
 
