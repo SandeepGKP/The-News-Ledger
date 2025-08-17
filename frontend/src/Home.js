@@ -184,7 +184,7 @@ export default function Home() {
               {article.urlToImage && (
                 <img src={article.urlToImage} alt="News" className="rounded w-full h-48 object-cover" />
               )}
-              <h2 className="font-bold text-lg mt-2">{article.title}</h2>
+              <h2 className="font-bold text-lg mt-2 text-white">{article.title}</h2>
               <p className="text-sm mt-1 text-gray-600 dark:text-gray-300">{article.description}</p>
               <a
                 href={article.url}
