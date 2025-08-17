@@ -4,6 +4,8 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const app = express();
 
@@ -15,8 +17,9 @@ app.use(cors());
 
 app.use(express.json()); // for JSON body parsing
 
-const mongoURI = process.env.mongoURI ;
-mongoose.connect(mongoURI)
+const URL= process.env.mongoURI ;
+
+mongoose.connect(URL)
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -69,6 +72,7 @@ app.get('/api/news', async (req, res) => {
   try {
     console.log('Fetching news from URL:', url); // Log the URL
     const response = await axios.get(url);
+    console.log('API Response:', response.data); // Log the API response
     res.json(response.data);
   } catch (error) {
     console.error('API Error:', error.response ? error.response.data : error.message); // Log full error response
