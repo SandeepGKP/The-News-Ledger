@@ -3,6 +3,8 @@ import axios from 'axios';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import {ToastContainer, toast} from 'react-toastify';
+
 
 const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
 
@@ -62,13 +64,15 @@ export default function Home() {
     if (!exists) {
       const updatedBookmarks = [article, ...existingBookmarks];
       localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+      toast.success('Bookmarked!',{ className: "custom-toast" });
       setBookmarks(updatedBookmarks); // Update the bookmarks state immediately
     }
   };
 
   const handleRemoveBookmark = (article) => {
-    const updatedBookmarks = bookmarks.filter((a) => a.url !== article.url);
+    const updatedBookmarks =  bookmarks.filter((a) => a.url !== article.url);
     localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+    toast.success('Bookmark removed!',{ className: "custom-toast" })
     setBookmarks(updatedBookmarks); // Update the bookmarks state after removal
   };
 
@@ -93,6 +97,7 @@ export default function Home() {
 
   return (
     <div className="p-4">
+      <ToastContainer position="top-right" toastClassName="custom-toast" autoClose={1000} hideProgressBar={false} closeOnClick draggable />
       <div className="sticky top-10 z-40 bg-inherit py-1">
         <div className="flex flex-wrap gap-2">
           <input
@@ -153,7 +158,7 @@ export default function Home() {
                       </a>
                       <button
                         onClick={() => handleRemoveBookmark(article)}
-                        className="text-sm text-red-600 ml-2"
+                        className="text-sm text-red-600 ml-10"
                       >
                         remove
                       </button>
