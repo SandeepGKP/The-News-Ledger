@@ -179,7 +179,7 @@ export default function Home() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {/* Regular News Articles */}
-          {news.map((article, idx) => (
+          {news.slice(0,9).map((article, idx) => (
             <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
               {article.urlToImage && (
                 <img src={article.urlToImage} alt="News" className="rounded w-full h-48 object-cover" />
