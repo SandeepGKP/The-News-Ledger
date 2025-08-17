@@ -155,7 +155,7 @@ export default function Home() {
                         onClick={() => handleRemoveBookmark(article)}
                         className="text-sm text-red-600 ml-2"
                       >
-                        ❌ Remove
+                        reactemove
                       </button>
                     </div>
                   ))
