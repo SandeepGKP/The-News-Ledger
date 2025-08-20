@@ -22,7 +22,7 @@ const Login = ({ onLogin }) => {
       navigate('/home');
     } catch (err) {
       console.error("Login failed: ", err);
-      navigate('/signup');  // Navigate to signup page if login fails
+      toast.error(err.response?.data?.message || "Login failed!");
     }
   };
 

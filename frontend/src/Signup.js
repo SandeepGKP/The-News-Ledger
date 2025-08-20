@@ -25,10 +25,10 @@ function Signup() {
         toast.success("Signup successful! You can now login.");
         navigate('/login');
       } else {
-        alert(data.message);
+        toast.error(data.message || "Signup failed!");
       }
     } catch (err) {
-      alert('Signup error');
+      toast.error('Signup error');
     }
   };
 
