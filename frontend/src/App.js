@@ -17,6 +17,7 @@ function App() {
   const [caller, setCaller] = useState('');
   const [callerSignal, setCallerSignal] = useState();
   const [callRoomName, setCallRoomName] = useState('');
+  const [selectedChatRecipient, setSelectedChatRecipient] = useState(null); // New state for chat recipient
   const username = localStorage.getItem('username');
 
   const handleLogout = () => {
@@ -30,7 +31,9 @@ function App() {
     }
 
     socket.on('updateUserList', (users) => {
-      setOnlineUsers(users.filter(user => user !== username));
+      // Ensure uniqueness and filter out the current user
+      const uniqueUsers = Array.from(new Set(users));
+      setOnlineUsers(uniqueUsers.filter(user => user !== username));
     });
 
     socket.on('hey', (data) => {
@@ -55,6 +58,11 @@ function App() {
       // For now, we'll pass a dummy signal, actual signal will be generated in VideoCall component
       socket.emit('callUser', { userToCall, roomName: room, signalData: null });
     }
+  };
+
+  const handleStartChat = (recipient) => {
+    setSelectedChatRecipient(recipient);
+    window.location.href = `/chat?recipient=${recipient}`; // Navigate to chat page with recipient
   };
 
   const acceptCall = () => {
@@ -138,6 +146,7 @@ function App() {
         <Sidebar
           onlineUsers={onlineUsers}
           handleStartVideoCall={handleStartVideoCall}
+          handleStartChat={handleStartChat} // Pass handleStartChat to Sidebar
           receivingCall={receivingCall}
           caller={caller}
           acceptCall={acceptCall}
@@ -146,7 +155,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/home" element={<Home />} />
-            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat" element={<ChatPage selectedChatRecipient={selectedChatRecipient} />} /> {/* Pass selectedChatRecipient */}
             <Route
               path="/video-call"
               element={
