@@ -22,7 +22,7 @@ function Signup() {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('token', data.token); // Assuming the registration response includes a token
         localStorage.setItem('username', username); // Store the username directly
-        navigate('/home'); // Navigate to home after successful signup and login
+        navigate('/login'); // Navigate to home after successful signup and login
       } else {
         toast.error(data.message || "Signup failed!");
       }

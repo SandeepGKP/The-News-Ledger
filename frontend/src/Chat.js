@@ -69,7 +69,7 @@ export default function Chat() {
           type="text"
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
-          className="flex-1 border px-3 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+          className="flex-1 border px-3 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-200"
           placeholder="Type a message..."
         />
         <button

@@ -18,6 +18,12 @@ function App() {
   const [callRoomName, setCallRoomName] = useState('');
   const username = localStorage.getItem('username'); // Get current user's username
 
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    // Redirect to login page or refresh to trigger login check
+    window.location.href = '/login'; // Assuming '/login' is your login route
+  };
+
   useEffect(() => {
     if (username) {
       socket.emit('userLoggedIn', username);
@@ -116,10 +122,31 @@ function App() {
             </svg>
           )}
         </button>
+        {username && ( // Only show logout button if user is logged in
+          <button
+            onClick={handleLogout}
+            className="flex mr-5 items-center justify-center w-auto px-4 py-2 rounded-full  text-red-400 shadow-md hover:scale-110 transition-transform duration-200"
+            aria-label="Logout"
+          >
+            Logout
+          </button>
+        )}
         {/* Online Users for Video Call */}
-        <div className="relative ml-4">
-          <button className="px-3 py-1 bg-green-600 text-white rounded">
-            Online Users ({onlineUsers.length})
+        <div className="relative mr-4">
+          <button className="px-1 py-1 bg-green-600 text-white rounded flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-1 text-red-300"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                clipRule="evenodd"
+              />
+            </svg>
+            ({onlineUsers.length})
           </button>
           {onlineUsers.length > 0 && (
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
