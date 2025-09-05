@@ -3,9 +3,9 @@ import { FaVideo, FaCommentDots } from 'react-icons/fa'; // Import FaCommentDots
 
 export default function Sidebar({ onlineUsers, handleStartVideoCall, handleStartChat, receivingCall, caller, acceptCall, declineCall }) {
   return (
-    <div className="w-1/4 p-4 bg-gray-200 dark:bg-gray-800 flex flex-col overflow-y-scroll">
+    <div className="w-1/4 p-4 bg-gray-200 dark:bg-gray-800 flex flex-col h-auto">
       <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white">Online Users ({onlineUsers.length})</h3>
-      <div className="flex-grow overflow-y-auto">
+      <div className="flex-grow overflow-y-scroll">
         {onlineUsers.length > 0 ? (
           onlineUsers.map((user, idx) => (
             <div key={idx} className="p-2 border-b border-gray-300 dark:border-gray-700 last:border-b-0 flex justify-between items-center">
