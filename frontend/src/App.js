@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import Home from './Home';
 import ChatPage from './ChatPage';
 import VideoCallPage from './VideoCallPage';
@@ -17,12 +17,12 @@ function App() {
   const [caller, setCaller] = useState('');
   const [callerSignal, setCallerSignal] = useState();
   const [callRoomName, setCallRoomName] = useState('');
+  const [selectedChatRecipient, setSelectedChatRecipient] = useState(null); // New state for chat recipient
   const username = localStorage.getItem('username');
-  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleLogout = () => {
     localStorage.removeItem('username');
-    navigate('/login'); // Use navigate instead of window.location.href
+    window.location.href = '/login';
   };
 
   useEffect(() => {
@@ -54,19 +54,20 @@ function App() {
     if (room) {
       setVideoRoomName(room);
       // Navigate to video call page
-      navigate(`/video-call?room=${room}&userToCall=${userToCall}`); // Use navigate
+      window.location.href = `/video-call?room=${room}&userToCall=${userToCall}`;
       // For now, we'll pass a dummy signal, actual signal will be generated in VideoCall component
       socket.emit('callUser', { userToCall, roomName: room, signalData: null });
     }
   };
 
   const handleStartChat = (recipient) => {
-    navigate(`/chat?recipient=${recipient}`); // Use navigate to change URL without full refresh
+    setSelectedChatRecipient(recipient);
+    window.location.href = `/chat?recipient=${recipient}`; // Navigate to chat page with recipient
   };
 
   const acceptCall = () => {
     setReceivingCall(false);
-    navigate(`/video-call?room=${callRoomName}&caller=${caller}&signal=${JSON.stringify(callerSignal)}`); // Use navigate
+    window.location.href = `/video-call?room=${callRoomName}&caller=${caller}&signal=${JSON.stringify(callerSignal)}`;
   };
 
   const declineCall = () => {
@@ -88,10 +89,10 @@ function App() {
             <FaHome className="mr-1" /> Home
           </Link>
           <Link to="/chat" className="flex items-center text-white hover:text-gray-200">
-            <FaCommentDots className="mr-1" /> Chat
+            <FaCommentDots className="mr-1" /> 
           </Link>
           <Link to="/video-call" className="flex items-center mr-4 text-white hover:text-gray-200">
-            <FaVideo className="mr-1" /> Video Call
+            <FaVideo className="mr-1" />
           </Link>
         </nav>
         <button
@@ -154,7 +155,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/home" element={<Home />} />
-            <Route path="/chat" element={<ChatPage />} /> {/* No need to pass selectedChatRecipient, ChatPage reads from URL */}
+            <Route path="/chat" element={<ChatPage selectedChatRecipient={selectedChatRecipient} />} /> {/* Pass selectedChatRecipient */}
             <Route
               path="/video-call"
               element={

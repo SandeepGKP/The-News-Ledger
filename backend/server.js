@@ -119,15 +119,9 @@ io.on('connection', (socket) => {
 
   // When a user logs in, associate their username with their socket ID
   socket.on('userLoggedIn', (username) => {
-    // Remove any existing entries for this username to ensure only the latest socket ID is used
-    for (let id in users) {
-      if (users[id] === username) {
-        delete users[id];
-      }
-    }
     users[socket.id] = username;
     console.log(`User ${username} connected with ID: ${socket.id}`);
-    io.emit('updateUserList', Object.values(users).filter(Boolean)); // Notify all clients of updated user list
+    io.emit('updateUserList', Object.values(users)); // Notify all clients of updated user list
   });
 
   // Handle chat messages
