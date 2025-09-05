@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion'; // Import motion
 import io from 'socket.io-client';
+import { FaPaperPlane } from 'react-icons/fa';
 
 const socket = io('https://the-news-ledger.onrender.com'); // Connect to your backend Socket.IO server
 
@@ -38,8 +40,11 @@ export default function Chat() {
         {messages.map((msg, index) => {
           const isMyMessage = msg.sender === username;
           return (
-            <div
+            <motion.div
               key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
               className={`flex mb-2 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
             >
               <div
@@ -55,7 +60,7 @@ export default function Chat() {
                   {msg.timestamp}
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
@@ -69,9 +74,9 @@ export default function Chat() {
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
         >
-          Send
+          <FaPaperPlane className="mr-2" /> Send
         </button>
       </form>
     </div>

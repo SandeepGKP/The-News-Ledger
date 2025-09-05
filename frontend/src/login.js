@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ToastContainer,toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const Login = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const navigate = useNavigate();
@@ -12,13 +12,13 @@ const Login = ({ onLogin }) => {
   const handleLogin = async () => {
     try {
       const res = await axios.post('https://the-news-ledger.onrender.com/api/login', 
-        { username, password } );
+        { usernameOrEmail, password } );
         toast.success("Login successful!");
-        // const res = await axios.post('http://localhost:5000/api/login', 
-        //   { username, password } );
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('username', username); // Store username
+      // Fetch username from the backend response if login was by email
+      const userRes = await axios.get(`https://the-news-ledger.onrender.com/api/user/${usernameOrEmail}`);
+      localStorage.setItem('username', userRes.data.username); 
       onLogin();
       navigate('/home');
     } catch (err) {
@@ -49,9 +49,9 @@ const Login = ({ onLogin }) => {
           <div className="space-y-4">
             <input
               type="text"
-              placeholder="User Name"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="User Name or Email"
+              value={usernameOrEmail}
+              onChange={(e) => setUsernameOrEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'; // Import motion and AnimatePresence
 import Home from '../src/Home';
 import Chat from '../src/Chat'; // Import the Chat component
 import VideoCall from '../src/VideoCall'; // Import the VideoCall component
@@ -40,6 +41,10 @@ function App() {
   }, [username]);
 
   const handleStartVideoCall = (userToCall) => {
+    if (showVideoCall) {
+      alert("You are already in a video call. Please end the current call before starting a new one.");
+      return;
+    }
     const room = prompt("Enter a room name for the video call:");
     if (room) {
       setVideoRoomName(room);
@@ -137,34 +142,44 @@ function App() {
         <div className="w-3/4"> {/* Adjust width as needed */}
           <Home />
         </div>
-        <div className="w-1/4 p-4"> {/* Adjust width and padding as needed */}
+        <div className="w-1/4 p-4 flex flex-col space-y-4"> {/* Combined into a single div, adjust width and padding as needed */}
+          {showVideoCall && (
+            <VideoCall roomName={videoRoomName} callerSignal={callerSignal} />
+          )}
           <Chat />
-          {showVideoCall && <VideoCall roomName={videoRoomName} callerSignal={callerSignal} />}
         </div>
       </div>
 
-      {/* Incoming Call Notification */}
-      {receivingCall && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">{caller} is calling you!</h2>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={acceptCall}
-                className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-              >
-                Accept
-              </button>
-              <button
-                onClick={declineCall}
-                className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-              >
-                Decline
-              </button>
+      {/* Incoming Call Notification with Framer Motion */}
+      <AnimatePresence>
+        {receivingCall && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          >
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">{caller} is calling you!</h2>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={acceptCall}
+                  className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={declineCall}
+                  className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                >
+                  Decline
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

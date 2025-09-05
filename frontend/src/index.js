@@ -11,8 +11,8 @@ const Root = () => {
   const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
+    // Removed localStorage.removeItem('isLoggedIn') to prevent clearing login status after signup
     if (!sessionStorage.getItem('visited')) {
-      localStorage.removeItem('isLoggedIn');
       sessionStorage.setItem('visited', 'true');
     }
 

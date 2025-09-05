@@ -4,26 +4,25 @@ import { ToastContainer,toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 function Signup() {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      // const res = await fetch('http://localhost:5000/api/register', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ username, password })
-      // });
       const res = await fetch('https://the-news-ledger.onrender.com/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, email, password })
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success("Signup successful! You can now login.");
-        navigate('/login');
+        toast.success("Signup successful! Logging you in...");
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('token', data.token); // Assuming the registration response includes a token
+        localStorage.setItem('username', username); // Store the username directly
+        navigate('/home'); // Navigate to home after successful signup and login
       } else {
         toast.error(data.message || "Signup failed!");
       }
@@ -55,6 +54,14 @@ function Signup() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="User Name"
+              required
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              placeholder="Email"
               required
               className="w-full p-2 border border-gray-300 rounded"
             />

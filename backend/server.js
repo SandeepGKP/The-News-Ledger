@@ -37,34 +37,55 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // User Schema
 const UserSchema = new mongoose.Schema({
-  username: { type: String, unique: true },
-  password: String,
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
 });
 const User = mongoose.model('User', UserSchema);
 
 // Registration endpoint
 app.post('/api/register', async (req, res) => {
-  const { username, password } = req.body;
-  const userExists = await User.findOne({ username });
-  if (userExists) return res.status(400).json({ message: 'User already exists' });
+  const { username, email, password } = req.body;
+  
+  // Check if username or email already exists
+  const userExists = await User.findOne({ $or: [{ username }, { email }] });
+  if (userExists) {
+    return res.status(400).json({ message: 'Username or Email already exists' });
+  }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ username, password: hashedPassword });
+  const user = new User({ username, email, password: hashedPassword });
   await user.save();
   res.status(201).json({ message: 'User registered successfully' });
 });
 
 // Login endpoint
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
+  const { usernameOrEmail, password } = req.body;
+  // Allow login with either username or email
+  const user = await User.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] });
   if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1d' });
-  res.json({ token });
+  res.json({ token, username: user.username }); // Also return username on successful login
+});
+
+// New endpoint to get user by username or email
+app.get('/api/user/:usernameOrEmail', async (req, res) => {
+  const { usernameOrEmail } = req.params;
+  try {
+    const user = await User.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ username: user.username, email: user.email });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // News endpoint (MODIFIED)
