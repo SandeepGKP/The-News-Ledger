@@ -25,10 +25,9 @@ const Root = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to={isLoggedIn ? '/home' : '/login'} />} />
         <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/home" element={isLoggedIn ? <App /> : <Navigate to="/login" />} />
+        <Route path="/*" element={isLoggedIn ? <App /> : <Navigate to="/login" />} />
       </Routes>
     </Router>
   );

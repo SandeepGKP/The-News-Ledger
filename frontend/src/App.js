@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; // Import motion and AnimatePresence
-import Home from '../src/Home';
-import Chat from '../src/Chat'; // Import the Chat component
-import VideoCall from '../src/VideoCall'; // Import the VideoCall component
+import { Routes, Route, Link } from 'react-router-dom';
+import Home from './Home';
+import ChatPage from './ChatPage';
+import VideoCallPage from './VideoCallPage';
+import Sidebar from './Sidebar';
 import io from 'socket.io-client';
+import { FaVideo, FaCommentDots, FaHome } from 'react-icons/fa'; // Import icons for navigation
 
-const socket = io('https://the-news-ledger.onrender.com'); // Connect to your backend Socket.IO server
+const socket = io('https://the-news-ledger.onrender.com');
 
 function App() {
   const [dark, setDark] = useState(false);
-  const [showVideoCall, setShowVideoCall] = useState(false);
   const [videoRoomName, setVideoRoomName] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [receivingCall, setReceivingCall] = useState(false);
   const [caller, setCaller] = useState('');
   const [callerSignal, setCallerSignal] = useState();
   const [callRoomName, setCallRoomName] = useState('');
-  const username = localStorage.getItem('username'); // Get current user's username
+  const username = localStorage.getItem('username');
 
   const handleLogout = () => {
     localStorage.removeItem('username');
-    // Redirect to login page or refresh to trigger login check
-    window.location.href = '/login'; // Assuming '/login' is your login route
+    window.location.href = '/login';
   };
 
   useEffect(() => {
@@ -30,7 +30,7 @@ function App() {
     }
 
     socket.on('updateUserList', (users) => {
-      setOnlineUsers(users.filter(user => user !== username)); // Exclude current user
+      setOnlineUsers(users.filter(user => user !== username));
     });
 
     socket.on('hey', (data) => {
@@ -47,24 +47,19 @@ function App() {
   }, [username]);
 
   const handleStartVideoCall = (userToCall) => {
-    if (showVideoCall) {
-      alert("You are already in a video call. Please end the current call before starting a new one.");
-      return;
-    }
     const room = prompt("Enter a room name for the video call:");
     if (room) {
       setVideoRoomName(room);
-      setShowVideoCall(true);
+      // Navigate to video call page
+      window.location.href = `/video-call?room=${room}&userToCall=${userToCall}`;
       // For now, we'll pass a dummy signal, actual signal will be generated in VideoCall component
       socket.emit('callUser', { userToCall, roomName: room, signalData: null });
     }
   };
 
   const acceptCall = () => {
-    setShowVideoCall(true);
-    setVideoRoomName(callRoomName);
     setReceivingCall(false);
-    // The VideoCall component will handle sending the answer
+    window.location.href = `/video-call?room=${callRoomName}&caller=${caller}&signal=${JSON.stringify(callerSignal)}`;
   };
 
   const declineCall = () => {
@@ -76,20 +71,28 @@ function App() {
   };
 
   return (
-    <div className={`${dark ? 'bg-black text-white' : 'bg-gray-100 text-black'} min-h-screen`}>
+    <div className={`${dark ? 'bg-black text-white' : 'bg-gray-100 text-black'} min-h-screen flex flex-col`}>
       <header className="shadow p-1 flex justify-between items-center bg-blue-600 sticky top-0 z-50">
-        <h1
-          className="text-xl font-bold cursor-pointer text-black text-center w-full"
-        >
+        <h1 className="text-xl font-bold cursor-pointer ml-0 text-black text-center w-full">
           The News Ledger
         </h1>
+        <nav className="flex space-x-4 mr-auto ml-4">
+          <Link to="/home" className="flex items-center text-white hover:text-gray-200">
+            <FaHome className="mr-1" /> Home
+          </Link>
+          <Link to="/chat" className="flex items-center text-white hover:text-gray-200">
+            <FaCommentDots className="mr-1" /> 
+          </Link>
+          <Link to="/video-call" className="flex items-center mr-4 text-white hover:text-gray-200">
+            <FaVideo className="mr-1" />
+          </Link>
+        </nav>
         <button
           onClick={() => setDark(!dark)}
-          className="flex mr-5 items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md hover:scale-110 transition-transform duration-200"
+          className="flex ml-4 mr-5 items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md hover:scale-110 transition-transform duration-200"
           aria-label="Toggle Dark Mode"
-          >
+        >
           {dark ? (
-            // Sun Icon
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-5 h-5 text-yellow-500"
@@ -109,7 +112,6 @@ function App() {
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           ) : (
-            // Moon Icon
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-5 h-5 text-blue-500"
@@ -122,91 +124,41 @@ function App() {
             </svg>
           )}
         </button>
-        {username && ( // Only show logout button if user is logged in
+        {username && (
           <button
             onClick={handleLogout}
-            className="flex mr-5 items-center justify-center w-auto px-4 py-2 rounded-full  text-red-400 shadow-md hover:scale-110 transition-transform duration-200"
+            className="flex mr-5 items-center justify-center w-auto px-4 py-2 rounded-full text-red-400 shadow-md hover:scale-110 transition-transform duration-200"
             aria-label="Logout"
           >
             Logout
           </button>
         )}
-        {/* Online Users for Video Call */}
-        <div className="relative mr-4">
-          <button className="px-1 py-1 bg-green-600 text-white rounded flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-1 text-red-300"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                clipRule="evenodd"
-              />
-            </svg>
-            ({onlineUsers.length})
-          </button>
-          {onlineUsers.length > 0 && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-              {onlineUsers.map((user, idx) => (
-                <div key={idx} className="p-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0 flex justify-between items-center">
-                  <span className="text-gray-800 dark:text-gray-200">{user}</span>
-                  <button
-                    onClick={() => handleStartVideoCall(user)}
-                    className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-                  >
-                    Call
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </header>
-      <div className="flex">
-        <div className="w-3/4"> {/* Adjust width as needed */}
-          <Home />
-        </div>
-        <div className="w-1/4 p-4 flex flex-col space-y-4"> {/* Combined into a single div, adjust width and padding as needed */}
-          {showVideoCall && (
-            <VideoCall roomName={videoRoomName} callerSignal={callerSignal} />
-          )}
-          <Chat />
-        </div>
+      <div className="flex flex-grow">
+        <Sidebar
+          onlineUsers={onlineUsers}
+          handleStartVideoCall={handleStartVideoCall}
+          receivingCall={receivingCall}
+          caller={caller}
+          acceptCall={acceptCall}
+          declineCall={declineCall}
+        />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/home" element={<Home />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route
+              path="/video-call"
+              element={
+                <VideoCallPage
+                  roomName={videoRoomName}
+                  callerSignal={callerSignal}
+                />
+              }
+            />
+          </Routes>
+        </main>
       </div>
-
-      {/* Incoming Call Notification with Framer Motion */}
-      <AnimatePresence>
-        {receivingCall && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-          >
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">{caller} is calling you!</h2>
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={acceptCall}
-                  className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-                >
-                  Accept
-                </button>
-                <button
-                  onClick={declineCall}
-                  className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                >
-                  Decline
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

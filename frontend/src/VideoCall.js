@@ -47,12 +47,16 @@ export default function VideoCall({ roomName, callerSignal }) {
     };
 
     pc.onnegotiationneeded = async () => {
-      try {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        socket.emit('offer', offer, roomName, peerId);
-      } catch (err) {
-        console.error('Error creating offer:', err);
+      // Only create an offer if the signaling state is stable.
+      // This prevents creating an offer when we are expecting to receive one.
+      if (pc.signalingState === 'stable') {
+        try {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          socket.emit('offer', offer, roomName, peerId);
+        } catch (err) {
+          console.error('Error creating offer:', err);
+        }
       }
     };
 
