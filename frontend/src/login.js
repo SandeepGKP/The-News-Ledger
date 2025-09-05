@@ -18,6 +18,7 @@ const Login = ({ onLogin }) => {
         //   { username, password } );
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('username', username); // Store username
       onLogin();
       navigate('/home');
     } catch (err) {

@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
 import Home from '../src/Home';
+import Chat from '../src/Chat'; // Import the Chat component
+import VideoCall from '../src/VideoCall'; // Import the VideoCall component
 
 function App() {
   const [dark, setDark] = useState(false);
+  const [showVideoCall, setShowVideoCall] = useState(false);
+  const [videoRoomName, setVideoRoomName] = useState('');
+
+  const handleStartVideoCall = () => {
+    const room = prompt("Enter a room name for the video call:");
+    if (room) {
+      setVideoRoomName(room);
+      setShowVideoCall(true);
+    }
+  };
 
   return (
     <div className={`${dark ? 'bg-black text-white' : 'bg-gray-100 text-black'} min-h-screen`}>
@@ -16,7 +28,7 @@ function App() {
           onClick={() => setDark(!dark)}
           className="flex mr-5 items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md hover:scale-110 transition-transform duration-200"
           aria-label="Toggle Dark Mode"
-        >
+          >
           {dark ? (
             // Sun Icon
             <svg
@@ -51,10 +63,23 @@ function App() {
             </svg>
           )}
         </button>
-
+        <button
+          onClick={handleStartVideoCall}
+          className="ml-4 px-3 py-1 bg-purple-600 text-white rounded"
+        >
+          Start Video Call
+        </button>
 
       </header>
-      <Home />
+      <div className="flex">
+        <div className="w-3/4"> {/* Adjust width as needed */}
+          <Home />
+        </div>
+        <div className="w-1/4 p-4"> {/* Adjust width and padding as needed */}
+          <Chat />
+          {showVideoCall && <VideoCall roomName={videoRoomName} />}
+        </div>
+      </div>
     </div>
   );
 }

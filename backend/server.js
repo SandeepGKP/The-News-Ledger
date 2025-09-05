@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require('http'); // Import http module
+const socketIo = require('socket.io'); // Import socket.io
 const cors = require('cors');
 const axios = require('axios');
 const mongoose = require('mongoose');
@@ -8,6 +10,13 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app); // Create HTTP server
+const io = socketIo(server, {
+  cors: {
+    origin: "*", // Allow all origins for now, refine later
+    methods: ["GET", "POST"]
+  }
+});
 
 
 // app.use(cors({ origin : 'https://the-news-ledger-frontend.onrender.com/'}));
@@ -81,5 +90,48 @@ app.get('/api/news', async (req, res) => {
   
 });
 
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // Handle chat messages
+  socket.on('sendMessage', (message) => {
+    console.log('Message received:', message);
+    io.emit('receiveMessage', message); // Broadcast message to all connected clients
+  });
+
+  // WebRTC Signaling
+  socket.on('joinRoom', (roomName) => {
+    socket.join(roomName);
+    console.log(`${socket.id} joined room: ${roomName}`);
+    socket.to(roomName).emit('userJoined', socket.id);
+  });
+
+  socket.on('offer', (offer, roomName) => {
+    console.log('Offer received in room:', roomName);
+    socket.to(roomName).emit('offer', offer, socket.id);
+  });
+
+  socket.on('answer', (answer, roomName) => {
+    console.log('Answer received in room:', roomName);
+    socket.to(roomName).emit('answer', answer, socket.id);
+  });
+
+  socket.on('ice-candidate', (candidate, roomName) => {
+    console.log('ICE Candidate received in room:', roomName);
+    socket.to(roomName).emit('ice-candidate', candidate, socket.id);
+  });
+
+  socket.on('leaveRoom', (roomName) => {
+    socket.leave(roomName);
+    console.log(`${socket.id} left room: ${roomName}`);
+    socket.to(roomName).emit('userLeft', socket.id);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

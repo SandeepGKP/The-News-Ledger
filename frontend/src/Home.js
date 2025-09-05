@@ -3,7 +3,7 @@ import axios from 'axios';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import {ToastContainer, toast} from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 
 
 const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
@@ -20,6 +20,7 @@ export default function Home() {
   const [searchHistory, setSearchHistory] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [error, setError] = useState(false);
 
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
@@ -27,16 +28,17 @@ export default function Home() {
     setLoading(true);
     try {
       let url = `https://the-news-ledger.onrender.com/api/news?category=${category}&lang=en&country=${country}&max=12&page=${page}`;
-      
+
       // Add q only if not empty, and format for multi-word search
       if (searchQuery.trim()) {
         const formattedQuery = searchQuery.trim().split(/\s+/).join(' AND ');
         url += `&q=${encodeURIComponent(formattedQuery)}`;
       }
-      
+
       const res = await axios.get(url);
       console.log(res.data);
       setNews(Array.isArray(res.data.articles) ? res.data.articles : []);
+      setError(false); // Clear any previous errors on successful fetch
 
       // Add query to search history if it's a new, non-empty query
       if (searchQuery.trim() && !searchHistory.includes(searchQuery.trim())) {
@@ -46,7 +48,15 @@ export default function Home() {
       }
 
     } catch (err) {
-      console.error(err);
+      setNews([]); // Ensure news is empty on error
+      if (err.response && err.response.status === 500) {
+        // Server responded with a status code outside 2xx
+        setError(true);
+        console.error("Error Status:", err.response.status);
+      } else {
+        setError(true); // Set error for other types of fetch errors as well
+        console.error("API Error:", err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -111,15 +121,15 @@ export default function Home() {
     if (!exists) {
       const updatedBookmarks = [article, ...existingBookmarks];
       localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
-      toast.success('Bookmarked!',{ className: "custom-toast" });
+      toast.success('Bookmarked!', { className: "custom-toast" });
       setBookmarks(updatedBookmarks); // Update the bookmarks state immediately
     }
   };
 
   const handleRemoveBookmark = (article) => {
-    const updatedBookmarks =  bookmarks.filter((a) => a.url !== article.url);
+    const updatedBookmarks = bookmarks.filter((a) => a.url !== article.url);
     localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
-    toast.success('Bookmark removed!',{ className: "custom-toast" })
+    toast.success('Bookmark removed!', { className: "custom-toast" })
     setBookmarks(updatedBookmarks); // Update the bookmarks state after removal
   };
 
@@ -185,7 +195,7 @@ export default function Home() {
             <option value="jp">Japan</option>
             <option value="au">Australia</option>
             <option value="ae">UAE</option>
-          <option value="sg">Singapore</option>
+            <option value="sg">Singapore</option>
           </select>
 
           <div className="relative ml-auto"> {/* Added ml-auto here */}
@@ -234,13 +244,19 @@ export default function Home() {
           ))}
         </div>
       ) : news.length === 0 ? (
-        <div className="text-center text-yellow-500 mt-10 text-xl">
-          No article found matching your search! 😕
-        </div>
-      ) : (
+        error ? (
+          <div className="text-center text-red-500 mt-10">
+            Error fetching news. Please try again later.
+          </div>
+        ) : (
+          <div className="text-center text-yellow-500 mt-10 text-xl">
+            No article found matching your search! 😕
+          </div>
+
+        )) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {/* Regular News Articles */}
-          {news.slice(0,9).map((article, idx) => (
+          {news.slice(0, 9).map((article, idx) => (
             <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
               {article.urlToImage && (
                 <img src={article.urlToImage} alt="News" className="rounded w-full h-48 object-cover" />
