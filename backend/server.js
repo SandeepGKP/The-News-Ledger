@@ -127,7 +127,20 @@ io.on('connection', (socket) => {
   // Handle chat messages
   socket.on('sendMessage', (message) => {
     console.log('Message received:', message);
-    io.emit('receiveMessage', message); // Broadcast message to all connected clients
+    if (message.recipient) {
+      // Private message
+      const recipientSocketId = Object.keys(users).find(key => users[key] === message.recipient);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit('receiveMessage', message); // Send to recipient
+        io.to(socket.id).emit('receiveMessage', message); // Send to sender
+      } else {
+        console.log(`Recipient ${message.recipient} not found or not online.`);
+        // Optionally, send an error message back to the sender
+      }
+    } else {
+      // Public message (or lobby chat)
+      io.emit('receiveMessage', message); // Broadcast message to all connected clients
+    }
   });
 
   // Handle video call invitations
