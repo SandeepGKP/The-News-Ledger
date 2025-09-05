@@ -135,7 +135,7 @@ export default function Home() {
 
   const handleView = (url) => {
     const views = JSON.parse(localStorage.getItem('views') || '{}');
-    views[url] = (views[url] || 0) + 1;
+    views[url] = (views[url] || 0) + 1; 
     localStorage.setItem('views', JSON.stringify(views));
   };
 

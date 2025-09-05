@@ -1,43 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion'; // Import motion
 import io from 'socket.io-client';
 import { FaPaperPlane } from 'react-icons/fa';
 
 const socket = io('https://the-news-ledger.onrender.com'); // Connect to your backend Socket.IO server
 
+// Helper function to create a consistent chat ID
+const getChatId = (user1, user2) => {
+  return [user1, user2].sort().join('-');
+};
+
 export default function Chat({ recipient }) {
-  const [messages, setMessages] = useState([]);
+  const [allMessages, setAllMessages] = useState({}); // Stores messages for all chats
   const [messageInput, setMessageInput] = useState('');
   const username = localStorage.getItem('username') || 'Guest'; // Get username from localStorage
+  const messagesEndRef = useRef(null); // Ref for scrolling to the bottom of messages
 
   useEffect(() => {
+    // Emit userLoggedIn when component mounts
+    socket.emit('userLoggedIn', username);
+
     socket.on('receiveMessage', (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
+      setAllMessages((prevAllMessages) => {
+        const chatId = getChatId(message.sender, message.recipient);
+        return {
+          ...prevAllMessages,
+          [chatId]: [...(prevAllMessages[chatId] || []), message],
+        };
+      });
     });
 
     return () => {
       socket.off('receiveMessage');
     };
-  }, []);
+  }, [username]); // Depend on username to re-emit userLoggedIn if it changes
+
+  // Scroll to the bottom of messages whenever messages for the current recipient change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [allMessages, recipient]);
 
   const sendMessage = (e) => {
     e.preventDefault();
-    if (messageInput.trim() && recipient) { // Only send if there's a recipient
+    if (messageInput.trim() && recipient) {
       const messageData = {
         sender: username,
-        recipient: recipient, // Add recipient to message data
+        recipient: recipient,
         text: messageInput,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
+
+      // Add message to local state immediately
+      setAllMessages((prevAllMessages) => {
+        const chatId = getChatId(username, recipient);
+        return {
+          ...prevAllMessages,
+          [chatId]: [...(prevAllMessages[chatId] || []), messageData],
+        };
+      });
+
       socket.emit('sendMessage', messageData);
       setMessageInput('');
     }
   };
 
-  const filteredMessages = messages.filter(msg =>
-    (msg.sender === username && msg.recipient === recipient) ||
-    (msg.sender === recipient && msg.recipient === username)
-  );
+  const currentChatId = recipient ? getChatId(username, recipient) : null;
+  const currentMessages = currentChatId ? (allMessages[currentChatId] || []) : [];
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 rounded-lg shadow-lg p-4">
@@ -45,7 +73,7 @@ export default function Chat({ recipient }) {
         Chat {recipient ? `with ${recipient}` : ''}
       </h2>
       <div className="flex-1 overflow-y-scroll mb-4 p-2 border rounded-md bg-white dark:bg-gray-800">
-        {filteredMessages.map((msg, index) => {
+        {currentMessages.map((msg, index) => {
           const isMyMessage = msg.sender === username;
           return (
             <motion.div
@@ -71,6 +99,7 @@ export default function Chat({ recipient }) {
             </motion.div>
           );
         })}
+        <div ref={messagesEndRef} /> {/* Scroll to this element */}
       </div>
       <form onSubmit={sendMessage} className="flex">
         <input
@@ -79,12 +108,12 @@ export default function Chat({ recipient }) {
           onChange={(e) => setMessageInput(e.target.value)}
           className="flex-1 border px-3 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-200"
           placeholder={recipient ? `Message ${recipient}...` : 'Select a user to chat with...'}
-          disabled={!recipient} // Disable input if no recipient is selected
+          disabled={!recipient}
         />
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-          disabled={!recipient} // Disable button if no recipient is selected
+          disabled={!recipient}
         >
           <FaPaperPlane className="mr-2" />
         </button>
