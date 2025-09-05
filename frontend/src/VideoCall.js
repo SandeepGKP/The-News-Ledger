@@ -215,18 +215,18 @@ export default function VideoCall({ roomName, callerSignal }) {
       <div className="flex gap-4">
         {!isCallActive ? (
           <button onClick={startCall} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center">
-            <FaVideo className="mr-2" /> Start Call
+            <FaVideo className="mr-2" /> 
           </button>
         ) : (
           <>
             <button onClick={toggleMute} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-              {isMuted ? <><FaMicrophoneSlash className="mr-2" /> Unmute</> : <><FaMicrophone className="mr-2" /> Mute</>}
+              {isMuted ? <><FaMicrophoneSlash className="mr-2" /></> : <><FaMicrophone className="mr-2" /></>}
             </button>
             <button onClick={toggleCamera} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-              {isCameraOff ? <><FaVideo className="mr-2" /> Turn Camera On</> : <><FaVideoSlash className="mr-2" /> Turn Camera Off</>}
+              {isCameraOff ? <><FaVideo className="mr-2" /></> : <><FaVideoSlash className="mr-2" /></>}
             </button>
             <button onClick={endCall} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center">
-              <FaPhoneSlash className="mr-2" /> End Call
+              <FaPhoneSlash className="mr-2" /> 
             </button>
           </>
         )}

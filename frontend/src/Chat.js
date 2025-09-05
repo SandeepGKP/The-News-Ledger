@@ -76,7 +76,7 @@ export default function Chat() {
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
         >
-          <FaPaperPlane className="mr-2" /> Send
+          <FaPaperPlane className="mr-2" />
         </button>
       </form>
     </div>
