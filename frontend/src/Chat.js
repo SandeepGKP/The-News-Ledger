@@ -21,8 +21,12 @@ export default function Chat() {
   const sendMessage = (e) => {
     e.preventDefault();
     if (messageInput.trim()) {
-      const fullMessage = `${username}: ${messageInput}`; // Prepend username to message
-      socket.emit('sendMessage', fullMessage);
+      const messageData = {
+        sender: username,
+        text: messageInput,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      socket.emit('sendMessage', messageData);
       setMessageInput('');
     }
   };
@@ -31,11 +35,29 @@ export default function Chat() {
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 rounded-lg shadow-lg p-4">
       <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Chat</h2>
       <div className="flex-1 overflow-y-auto mb-4 p-2 border rounded-md bg-white dark:bg-gray-800">
-        {messages.map((msg, index) => (
-          <div key={index} className="mb-2 text-gray-700 dark:text-gray-300">
-            {msg}
-          </div>
-        ))}
+        {messages.map((msg, index) => {
+          const isMyMessage = msg.sender === username;
+          return (
+            <div
+              key={index}
+              className={`flex mb-2 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[70%] p-2 rounded-lg shadow-md ${
+                  isMyMessage
+                    ? 'bg-blue-500 text-white rounded-br-none'
+                    : 'bg-gray-300 text-gray-800 rounded-bl-none dark:bg-gray-700 dark:text-gray-200'
+                }`}
+              >
+                {!isMyMessage && <div className="font-semibold text-sm mb-1">{msg.sender}</div>}
+                <div>{msg.text}</div>
+                <div className={`text-xs mt-1 ${isMyMessage ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'} text-right`}>
+                  {msg.timestamp}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
       <form onSubmit={sendMessage} className="flex">
         <input

@@ -1,19 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Home from '../src/Home';
 import Chat from '../src/Chat'; // Import the Chat component
 import VideoCall from '../src/VideoCall'; // Import the VideoCall component
+import io from 'socket.io-client';
+
+const socket = io('https://the-news-ledger.onrender.com'); // Connect to your backend Socket.IO server
 
 function App() {
   const [dark, setDark] = useState(false);
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [videoRoomName, setVideoRoomName] = useState('');
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [receivingCall, setReceivingCall] = useState(false);
+  const [caller, setCaller] = useState('');
+  const [callerSignal, setCallerSignal] = useState();
+  const [callRoomName, setCallRoomName] = useState('');
+  const username = localStorage.getItem('username'); // Get current user's username
 
-  const handleStartVideoCall = () => {
+  useEffect(() => {
+    if (username) {
+      socket.emit('userLoggedIn', username);
+    }
+
+    socket.on('updateUserList', (users) => {
+      setOnlineUsers(users.filter(user => user !== username)); // Exclude current user
+    });
+
+    socket.on('hey', (data) => {
+      setReceivingCall(true);
+      setCaller(data.fromUsername);
+      setCallerSignal(data.signal);
+      setCallRoomName(data.roomName);
+    });
+
+    return () => {
+      socket.off('updateUserList');
+      socket.off('hey');
+    };
+  }, [username]);
+
+  const handleStartVideoCall = (userToCall) => {
     const room = prompt("Enter a room name for the video call:");
     if (room) {
       setVideoRoomName(room);
       setShowVideoCall(true);
+      // For now, we'll pass a dummy signal, actual signal will be generated in VideoCall component
+      socket.emit('callUser', { userToCall, roomName: room, signalData: null });
     }
+  };
+
+  const acceptCall = () => {
+    setShowVideoCall(true);
+    setVideoRoomName(callRoomName);
+    setReceivingCall(false);
+    // The VideoCall component will handle sending the answer
+  };
+
+  const declineCall = () => {
+    setReceivingCall(false);
+    setCaller('');
+    setCallerSignal(null);
+    setCallRoomName('');
+    // Optionally, emit an event to the caller that the call was declined
   };
 
   return (
@@ -63,13 +111,27 @@ function App() {
             </svg>
           )}
         </button>
-        <button
-          onClick={handleStartVideoCall}
-          className="ml-4 px-3 py-1 bg-purple-600 text-white rounded"
-        >
-          Start Video Call
-        </button>
-
+        {/* Online Users for Video Call */}
+        <div className="relative ml-4">
+          <button className="px-3 py-1 bg-green-600 text-white rounded">
+            Online Users ({onlineUsers.length})
+          </button>
+          {onlineUsers.length > 0 && (
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+              {onlineUsers.map((user, idx) => (
+                <div key={idx} className="p-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0 flex justify-between items-center">
+                  <span className="text-gray-800 dark:text-gray-200">{user}</span>
+                  <button
+                    onClick={() => handleStartVideoCall(user)}
+                    className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                  >
+                    Call
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </header>
       <div className="flex">
         <div className="w-3/4"> {/* Adjust width as needed */}
@@ -77,9 +139,32 @@ function App() {
         </div>
         <div className="w-1/4 p-4"> {/* Adjust width and padding as needed */}
           <Chat />
-          {showVideoCall && <VideoCall roomName={videoRoomName} />}
+          {showVideoCall && <VideoCall roomName={videoRoomName} callerSignal={callerSignal} />}
         </div>
       </div>
+
+      {/* Incoming Call Notification */}
+      {receivingCall && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">{caller} is calling you!</h2>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={acceptCall}
+                className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+              >
+                Accept
+              </button>
+              <button
+                onClick={declineCall}
+                className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 
-export default function VideoCall({ roomName }) {
+export default function VideoCall({ roomName, callerSignal }) {
   const localVideoRef = useRef();
   const peerConnections = useRef({}); // Store multiple peer connections
   const localStream = useRef(null);
@@ -87,10 +87,31 @@ export default function VideoCall({ roomName }) {
   }, [roomName]);
 
   useEffect(() => {
+    const setupCall = async () => {
+      try {
+        localStream.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideoRef.current.srcObject = localStream.current;
+        setIsCallActive(true);
+        socket.emit('joinRoom', roomName);
+
+        if (callerSignal) {
+          // This means we are receiving a call and need to answer
+          const pc = await createPeerConnection(callerSignal.from);
+          await pc.setRemoteDescription(new RTCSessionDescription(callerSignal.signal));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          socket.emit('answer', answer, roomName, callerSignal.from);
+        }
+      } catch (error) {
+        console.error('Error accessing media devices or setting up call:', error);
+      }
+    };
+
+    setupCall();
+
     socket.on('userJoined', async (peerId) => {
       console.log('User joined:', peerId);
-      await createPeerConnection(peerId);
-      // The createPeerConnection function already handles adding the peer to peerConnections.current
+      const pc = await createPeerConnection(peerId);
       // No need to create offer here, onnegotiationneeded will handle it
     });
 
@@ -140,7 +161,7 @@ export default function VideoCall({ roomName }) {
       socket.off('userLeft');
       endCall();
     };
-  }, [roomName, createPeerConnection, endCall]);
+  }, [roomName, createPeerConnection, endCall, callerSignal]); // Added callerSignal to dependencies
 
   const toggleMute = () => {
     if (localStream.current) {

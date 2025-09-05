@@ -90,14 +90,47 @@ app.get('/api/news', async (req, res) => {
   
 });
 
+const users = {}; // Store active users: { socketId: username }
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
+
+  // When a user logs in, associate their username with their socket ID
+  socket.on('userLoggedIn', (username) => {
+    users[socket.id] = username;
+    console.log(`User ${username} connected with ID: ${socket.id}`);
+    io.emit('updateUserList', Object.values(users)); // Notify all clients of updated user list
+  });
 
   // Handle chat messages
   socket.on('sendMessage', (message) => {
     console.log('Message received:', message);
     io.emit('receiveMessage', message); // Broadcast message to all connected clients
+  });
+
+  // Handle video call invitations
+  socket.on('callUser', ({ userToCall, roomName, signalData }) => {
+    const callerId = socket.id;
+    const callerUsername = users[callerId];
+    // Find the socket ID of the user to call
+    const calleeSocketId = Object.keys(users).find(key => users[key] === userToCall);
+
+    if (calleeSocketId) {
+      io.to(calleeSocketId).emit('hey', {
+        signal: signalData,
+        from: callerId,
+        fromUsername: callerUsername,
+        roomName: roomName,
+      });
+    } else {
+      console.log(`User ${userToCall} not found or not online.`);
+      // Optionally, emit an event back to the caller to inform them the user is offline
+    }
+  });
+
+  socket.on('answerCall', (data) => {
+    io.to(data.to).emit('callAccepted', data.signal);
   });
 
   // WebRTC Signaling
@@ -130,6 +163,8 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    delete users[socket.id]; // Remove user from active users list
+    io.emit('updateUserList', Object.values(users)); // Notify all clients of updated user list
   });
 });
 
