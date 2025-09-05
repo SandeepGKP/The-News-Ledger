@@ -88,10 +88,10 @@ function App() {
             <FaHome className="mr-1" /> Home
           </Link>
           <Link to="/chat" className="flex items-center text-white hover:text-gray-200">
-            <FaCommentDots className="mr-1" /> 
+            <FaCommentDots className="mr-1" /> Chat
           </Link>
           <Link to="/video-call" className="flex items-center mr-4 text-white hover:text-gray-200">
-            <FaVideo className="mr-1" />
+            <FaVideo className="mr-1" /> Video Call
           </Link>
         </nav>
         <button
