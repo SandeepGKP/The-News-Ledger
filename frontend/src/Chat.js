@@ -13,7 +13,7 @@ const getChatId = (user1, user2) => {
 export default function Chat({ recipient }) {
   const [allMessages, setAllMessages] = useState({}); // Stores messages for all chats
   const [messageInput, setMessageInput] = useState('');
-  const username = localStorage.getItem('username' || 'Guest'); // Get username from localStorage
+  const username = localStorage.getItem('username'); // Get username from localStorage
   const messagesEndRef = useRef(null); // Ref for scrolling to the bottom of messages
 
   useEffect(() => {

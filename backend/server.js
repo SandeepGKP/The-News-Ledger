@@ -127,7 +127,7 @@ io.on('connection', (socket) => {
     }
     users[socket.id] = username;
     console.log(`User ${username} connected with ID: ${socket.id}`);
-    io.emit('updateUserList', Object.values(users)); // Notify all clients of updated user list
+    io.emit('updateUserList', Object.values(users).filter(Boolean)); // Notify all clients of updated user list
   });
 
   // Handle chat messages
