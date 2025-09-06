@@ -46,9 +46,8 @@ function App() {
 
     socket.on('updateUserList', (users) => {
       const currentUser = localStorage.getItem('username');
-      // Ensure uniqueness and filter out the current user
-      const uniqueUsers = Array.from(new Set(users));
-      setOnlineUsers(uniqueUsers.filter(user => user !== currentUser));
+      // Filter out the current user, but keep all instances of other users
+      setOnlineUsers(users.filter(user => user !== currentUser));
     });
 
     socket.on('hey', (data) => {

@@ -23,7 +23,7 @@ const Root = () => {
   if (loading) return null; // Prevent premature redirect
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
         <Route path="/signup" element={<Signup />} />
