@@ -111,7 +111,7 @@ app.get('/api/news', async (req, res) => {
   
 });
 
-const users = {}; // Store active users: { socketId: username }
+const users = {}; // Store active users: { username: [socketId1, socketId2, ...] }
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
@@ -119,9 +119,13 @@ io.on('connection', (socket) => {
 
   // When a user logs in, associate their username with their socket ID
   socket.on('userLoggedIn', (username) => {
-    users[socket.id] = username;
+    if (!users[username]) {
+      users[username] = [];
+    }
+    users[username].push(socket.id);
+    socket.username = username; // Store username on the socket for easy access on disconnect
     console.log(`User ${username} connected with ID: ${socket.id}`);
-    io.emit('updateUserList', Object.values(users)); // Notify all clients of updated user list
+    io.emit('updateUserList', Object.keys(users)); // Notify all clients of updated user list
   });
 
   // Handle chat messages
@@ -129,9 +133,11 @@ io.on('connection', (socket) => {
     console.log('Message received:', message);
     if (message.recipient) {
       // Private message
-      const recipientSocketId = Object.keys(users).find(key => users[key] === message.recipient);
-      if (recipientSocketId) {
-        io.to(recipientSocketId).emit('receiveMessage', message); // Send to recipient
+      const recipientSocketIds = users[message.recipient];
+      if (recipientSocketIds && recipientSocketIds.length > 0) {
+        recipientSocketIds.forEach(socketId => {
+          io.to(socketId).emit('receiveMessage', message); // Send to all recipient's sockets
+        });
         io.to(socket.id).emit('receiveMessage', message); // Send to sender
       } else {
         console.log(`Recipient ${message.recipient} not found or not online.`);
@@ -146,12 +152,14 @@ io.on('connection', (socket) => {
   // Handle video call invitations
   socket.on('callUser', ({ userToCall, roomName, signalData }) => {
     const callerId = socket.id;
-    const callerUsername = users[callerId];
-    // Find the socket ID of the user to call
-    const calleeSocketId = Object.keys(users).find(key => users[key] === userToCall);
+    const callerUsername = socket.username;
+    // Find the socket IDs of the user to call
+    const calleeSocketIds = users[userToCall];
 
-    if (calleeSocketId) {
-      io.to(calleeSocketId).emit('hey', {
+    if (calleeSocketIds && calleeSocketIds.length > 0) {
+      // For simplicity, we'll just call the first socket ID.
+      // A more robust solution might involve a way to select a specific device.
+      io.to(calleeSocketIds[0]).emit('hey', {
         signal: signalData,
         from: callerId,
         fromUsername: callerUsername,
@@ -197,8 +205,15 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
-    delete users[socket.id]; // Remove user from active users list
-    io.emit('updateUserList', Object.values(users)); // Notify all clients of updated user list
+    if (socket.username && users[socket.username]) {
+      // Remove the disconnected socket ID from the user's array
+      users[socket.username] = users[socket.username].filter(id => id !== socket.id);
+      // If the user has no more active connections, remove them from the users object
+      if (users[socket.username].length === 0) {
+        delete users[socket.username];
+      }
+    }
+    io.emit('updateUserList', Object.keys(users)); // Notify all clients of updated user list
   });
 });
 
