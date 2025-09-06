@@ -42,6 +42,7 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('username');
+    localStorage.removeItem('isLoggedIn'); // Ensure isLoggedIn is also removed on logout
     navigate('/login'); // Use navigate instead of window.location.href
   };
 

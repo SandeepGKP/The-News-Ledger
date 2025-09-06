@@ -92,7 +92,7 @@ app.get('/api/user/:usernameOrEmail', async (req, res) => {
 app.get('/api/news', async (req, res) => {
   const { category = 'general', country = 'in', lang = 'en', q = '', page = 1 } = req.query;
 
-  let url = `https://gnews.io/api/v4/top-headlines?category=${category}&lang=${lang}&country=${country}&max=12&page=${page}&token=52dcbaeea5cf1eb3cabd04cf2d82441f`;
+  let url = `https://gnews.io/api/v4/top-headlines?category=${category}&lang=${lang}&country=${country}&max=12&page=${page}&token=${process.env.GNEWS_API_KEY}`;
 
   // Add q only if not empty
   if (q) {
