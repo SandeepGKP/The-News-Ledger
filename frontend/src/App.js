@@ -151,7 +151,7 @@ function App() {
           {username && (
             <button
               onClick={handleLogout}
-              className="flex items-center justify-center w-auto px-4 py-2 rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 transition-colors duration-300"
+              className="flex items-center justify-center w-auto px-4 py-2 rounded-full bg-red-400 text-white shadow-md hover:bg-red-600 transition-colors duration-300"
               aria-label="Logout"
             >
               Logout
