@@ -64,7 +64,7 @@ export default function Chat({ recipient, socket }) {
   const currentMessages = currentChatId ? (allMessages[currentChatId] || []) : [];
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900 p-10">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       <div className="p-4 border-b dark:border-gray-700">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
           Chat {recipient ? `with ${recipient}` : 'Select a user'}

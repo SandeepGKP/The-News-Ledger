@@ -177,23 +177,23 @@ io.on('connection', (socket) => {
   // WebRTC Signaling
   socket.on('joinRoom', (roomName) => {
     socket.join(roomName);
-    console.log(`${socket.id} joined room: ${roomName}`);
-    socket.to(roomName).emit('userJoined', socket.id);
+    console.log(`${socket.id} (${socket.username}) joined room: ${roomName}`);
+    socket.to(roomName).emit('userJoined', { peerId: socket.id, username: socket.username });
   });
 
-  socket.on('offer', (offer, roomName) => {
-    console.log('Offer received in room:', roomName);
-    socket.to(roomName).emit('offer', offer, socket.id);
+  socket.on('offer', (offer, roomName, peerId) => {
+    console.log(`Offer received for peer ${peerId} in room: ${roomName}`);
+    socket.to(peerId).emit('offer', offer, { peerId: socket.id, username: socket.username });
   });
 
-  socket.on('answer', (answer, roomName) => {
-    console.log('Answer received in room:', roomName);
-    socket.to(roomName).emit('answer', answer, socket.id);
+  socket.on('answer', (answer, roomName, peerId) => {
+    console.log(`Answer received for peer ${peerId} in room: ${roomName}`);
+    socket.to(peerId).emit('answer', answer, { peerId: socket.id, username: socket.username });
   });
 
-  socket.on('ice-candidate', (candidate, roomName) => {
-    console.log('ICE Candidate received in room:', roomName);
-    socket.to(roomName).emit('ice-candidate', candidate, socket.id);
+  socket.on('ice-candidate', (candidate, roomName, peerId) => {
+    console.log(`ICE Candidate received for peer ${peerId} in room: ${roomName}`);
+    socket.to(peerId).emit('ice-candidate', candidate, { peerId: socket.id, username: socket.username });
   });
 
   socket.on('leaveRoom', (roomName) => {
