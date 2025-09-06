@@ -18,8 +18,7 @@ const Login = ({ onLogin }) => {
       localStorage.setItem('token', res.data.token);
       // Fetch username from the backend response if login was by email
       const userRes = await axios.get(`https://the-news-ledger.onrender.com/api/user/${usernameOrEmail}`);
-      localStorage.setItem('username', userRes.data.username); 
-      onLogin();
+      localStorage.setItem('username', userRes.data.username);
       navigate('/home');
     } catch (err) {
       console.error("Login failed: ", err);

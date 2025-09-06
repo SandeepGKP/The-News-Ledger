@@ -19,8 +19,20 @@ function App() {
   const [caller, setCaller] = useState('');
   const [callerSignal, setCallerSignal] = useState();
   const [callRoomName, setCallRoomName] = useState('');
-  const username = localStorage.getItem('username');
+  const [username, setUsername] = useState(localStorage.getItem('username'));
   const navigate = useNavigate(); // Initialize useNavigate
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUsername(localStorage.getItem('username'));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('username');
