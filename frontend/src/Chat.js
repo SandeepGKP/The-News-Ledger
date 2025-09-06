@@ -84,12 +84,12 @@ export default function Chat({ recipient, socket }) {
               <div
                 className={`max-w-md p-3 rounded-2xl shadow ${
                   isMyMessage
-                    ? 'bg-blue-500 text-white rounded-br-lg'
+                    ? 'bg-blue-500 text-white rounded-br-lg '
                     : 'bg-gray-200 text-gray-800 rounded-bl-lg dark:bg-gray-700 dark:text-gray-200'
                 }`}
               >
                 {!isMyMessage && <div className="font-bold text-sm mb-1 text-blue-600 dark:text-blue-400">{msg.sender}</div>}
-                <p className="text-base">{msg.text}</p>
+                <p className="text-base break-words">{msg.text}</p>
                 <div className={`text-xs mt-2 ${isMyMessage ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'} text-right`}>
                   {msg.timestamp}
                 </div>

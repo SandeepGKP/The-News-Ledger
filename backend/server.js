@@ -202,6 +202,15 @@ io.on('connection', (socket) => {
     socket.to(roomName).emit('userLeft', socket.id);
   });
 
+  socket.on('userLoggedOut', (username) => {
+    console.log(`User ${username} explicitly logged out.`);
+    if (users[username]) {
+      // Remove all socket IDs associated with this username
+      delete users[username];
+    }
+    io.emit('updateUserList', Object.keys(users)); // Notify all clients of updated user list
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
     if (socket.username && users[socket.username]) {

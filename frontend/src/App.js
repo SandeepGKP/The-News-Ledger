@@ -41,8 +41,12 @@ function App() {
   }, []); // Empty dependency array, runs once on mount
 
   const handleLogout = () => {
+    const currentUsername = localStorage.getItem('username');
+    if (currentUsername) {
+      socket.emit('userLoggedOut', currentUsername); // Emit event to server
+    }
     localStorage.removeItem('username');
-    localStorage.removeItem('token')
+    localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn'); // Ensure isLoggedIn is also removed on logout
     navigate('/login'); // Use navigate instead of window.location.href
   };
