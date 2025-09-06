@@ -31,9 +31,10 @@ function App() {
     }
 
     socket.on('updateUserList', (users) => {
+      const currentUser = localStorage.getItem('username');
       // Ensure uniqueness and filter out the current user
       const uniqueUsers = Array.from(new Set(users));
-      setOnlineUsers(uniqueUsers.filter(user => user !== username));
+      setOnlineUsers(uniqueUsers.filter(user => user !== currentUser));
     });
 
     socket.on('hey', (data) => {
@@ -134,7 +135,7 @@ function App() {
         {username && (
           <button
             onClick={handleLogout}
-            className="flex mr-5 items-center justify-center w-auto px-4 py-2 rounded-full text-red-400 shadow-md hover:scale-110 transition-transform duration-200"
+            className="flex mr-5 items-center justify-center w-auto px-4 py-2 rounded-full bg-red-500 text-white shadow-md hover:scale-110 transition-transform duration-200"
             aria-label="Logout"
           >
             Logout
