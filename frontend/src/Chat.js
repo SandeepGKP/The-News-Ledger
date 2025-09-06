@@ -64,11 +64,13 @@ export default function Chat({ recipient, socket }) {
   const currentMessages = currentChatId ? (allMessages[currentChatId] || []) : [];
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 rounded-lg shadow-lg p-4">
-      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">
-        Chat {recipient ? `with ${recipient}` : ''}
-      </h2>
-      <div className="flex-1 overflow-y-scroll mb-4 p-2 border rounded-md bg-white dark:bg-gray-800">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 p-10">
+      <div className="p-4 border-b dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+          Chat {recipient ? `with ${recipient}` : 'Select a user'}
+        </h2>
+      </div>
+      <div className="flex-1 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-800  p-6 space-y-4">
         {currentMessages.map((msg, index) => {
           const isMyMessage = msg.sender === username;
           return (
@@ -77,43 +79,45 @@ export default function Chat({ recipient, socket }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className={`flex mb-2 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+              className={`flex items-end gap-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[70%] p-2 rounded-lg shadow-md ${
+                className={`max-w-md p-3 rounded-2xl shadow ${
                   isMyMessage
-                    ? 'bg-blue-500 text-white rounded-br-none'
-                    : 'bg-gray-300 text-gray-800 rounded-bl-none dark:bg-gray-700 dark:text-gray-200'
+                    ? 'bg-blue-500 text-white rounded-br-lg'
+                    : 'bg-gray-200 text-gray-800 rounded-bl-lg dark:bg-gray-700 dark:text-gray-200'
                 }`}
               >
-                {!isMyMessage && <div className="font-semibold text-sm mb-1">{msg.sender}</div>}
-                <div>{msg.text}</div>
-                <div className={`text-xs mt-1 ${isMyMessage ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'} text-right`}>
+                {!isMyMessage && <div className="font-bold text-sm mb-1 text-blue-600 dark:text-blue-400">{msg.sender}</div>}
+                <p className="text-base">{msg.text}</p>
+                <div className={`text-xs mt-2 ${isMyMessage ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'} text-right`}>
                   {msg.timestamp}
                 </div>
               </div>
             </motion.div>
           );
         })}
-        <div ref={messagesEndRef} /> {/* Scroll to this element */}
+        <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={sendMessage} className="flex">
-        <input
-          type="text"
-          value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
-          className="flex-1 border px-3 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-200"
-          placeholder={recipient ? `Message ${recipient}...` : 'Select a user to chat with...'}
-          disabled={!recipient}
-        />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-          disabled={!recipient}
-        >
-          <FaPaperPlane className="mr-2" />
-        </button>
-      </form>
+      <div className="p-4 border-t dark:border-gray-700">
+        <form onSubmit={sendMessage} className="flex items-center gap-3">
+          <input
+            type="text"
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+            className="flex-1 bg-gray-100 text-white dark:bg-gray-800 border-transparent rounded-full px-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow duration-200"
+            placeholder={recipient ? `Message ${recipient}...` : 'Select a user to chat with...'}
+            disabled={!recipient}
+          />
+          <button
+            type="submit"
+            className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-transform transform hover:scale-110"
+            disabled={!recipient}
+          >
+            <FaPaperPlane />
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

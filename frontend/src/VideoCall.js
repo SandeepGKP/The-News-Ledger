@@ -89,7 +89,9 @@ export default function VideoCall({ roomName, callerSignal }) {
     setRemoteStreams({});
     socket.emit('leaveRoom', roomName);
     setIsCallActive(false);
-    localVideoRef.current.srcObject = null;
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
   }, [roomName]);
 
   useEffect(() => {
@@ -184,9 +186,9 @@ export default function VideoCall({ roomName, callerSignal }) {
   };
 
   return (
-    <div className="flex flex-col items-center p-4 bg-gray-100 dark:bg-gray-900 rounded-lg shadow-lg">
-      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Video Call: {roomName}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 w-full">
+    <div className="flex flex-col h-full items-center p-6 bg-white dark:bg-gray-900">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Video Call: {roomName}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 w-full flex-grow">
         <AnimatePresence>
           <motion.div
             key="local-video"
@@ -194,10 +196,10 @@ export default function VideoCall({ roomName, callerSignal }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="relative bg-black rounded-md overflow-hidden"
+            className="relative bg-black rounded-xl overflow-hidden shadow-lg"
           >
             <video ref={localVideoRef} autoPlay muted className="w-full h-full object-cover"></video>
-            <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">You</div>
+            <div className="absolute bottom-3 left-3 text-white bg-black bg-opacity-60 px-3 py-1 rounded-full text-sm">You</div>
           </motion.div>
           {Object.entries(remoteStreams).map(([peerId, stream]) => (
             <motion.div
@@ -206,31 +208,31 @@ export default function VideoCall({ roomName, callerSignal }) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.3 }}
-              className="relative bg-black rounded-md overflow-hidden"
+              className="relative bg-black rounded-xl overflow-hidden shadow-lg"
             >
               <video autoPlay className="w-full h-full object-cover" ref={(videoElement) => {
                 if (videoElement) videoElement.srcObject = stream;
               }}></video>
-              <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">{peerId}</div>
+              <div className="absolute bottom-3 left-3 text-white bg-black bg-opacity-60 px-3 py-1 rounded-full text-sm">{peerId}</div>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
-      <div className="flex gap-4">
+      <div className="flex items-center justify-center gap-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-full shadow-inner">
         {!isCallActive ? (
-          <button onClick={startCall} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center">
-            <FaVideo className="mr-2" /> 
+          <button onClick={startCall} className="p-4 bg-green-500 text-white rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-transform transform hover:scale-110">
+            <FaVideo />
           </button>
         ) : (
           <>
-            <button onClick={toggleMute} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-              {isMuted ? <><FaMicrophoneSlash className="mr-2" /></> : <><FaMicrophone className="mr-2" /></>}
+            <button onClick={toggleMute} className={`p-4 rounded-full transition-colors duration-300 ${isMuted ? 'bg-red-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'}`}>
+              {isMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
             </button>
-            <button onClick={toggleCamera} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-              {isCameraOff ? <><FaVideo className="mr-2" /></> : <><FaVideoSlash className="mr-2" /></>}
+            <button onClick={toggleCamera} className={`p-4 rounded-full transition-colors duration-300 ${isCameraOff ? 'bg-red-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'}`}>
+              {isCameraOff ? <FaVideoSlash /> : <FaVideo />}
             </button>
-            <button onClick={endCall} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center">
-              <FaPhoneSlash className="mr-2" /> 
+            <button onClick={endCall} className="p-4 bg-red-600 text-white rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-transform transform hover:scale-110">
+              <FaPhoneSlash />
             </button>
           </>
         )}

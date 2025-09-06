@@ -23,6 +23,7 @@
     "react-speech-recognition": "^4.0.0",
     "react-toastify": "^11.0.5",
     "socket.io-client": "^4.8.1",
+    "tailwind-scrollbar": "^3.0.0",
     "toastify": "^2.0.1",
     "web-vitals": "^2.1.4"
   },

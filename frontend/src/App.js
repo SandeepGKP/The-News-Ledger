@@ -79,25 +79,26 @@ function App() {
   };
 
   return (
-    <div className={`${dark ? 'bg-black text-white' : 'bg-gray-100 text-black'} min-h-screen flex flex-col`}>
-      <header className="shadow p-1 flex justify-between items-center bg-blue-600 sticky top-0 z-50">
-        <h1 className="text-xl font-bold cursor-pointer ml-0 text-black text-center w-full">
-          The News Ledger
+    <div className={`${dark ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'} min-h-screen flex flex-col font-sans`}>
+      <header className="shadow-md p-4 flex justify-between items-center bg-white dark:bg-gray-800 sticky top-0 z-50 border-b dark:border-gray-700">
+        <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          News Ledger
         </h1>
-        <nav className="flex space-x-4 mr-auto ml-4">
-          <Link to="/home" className="flex items-center text-white hover:text-gray-200">
-            <FaHome className="mr-1" /> Home
+        <nav className="flex items-center space-x-6">
+          <Link to="/home" className="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+            <FaHome className="mr-2" /> News
           </Link>
-          <Link to="/chat" className="flex items-center text-white hover:text-gray-200">
-            <FaCommentDots className="mr-1" /> 
+          <Link to="/chat" className="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+            <FaCommentDots className="mr-2" /> Chat
           </Link>
-          <Link to="/video-call" className="flex items-center mr-4 text-white hover:text-gray-200">
-            <FaVideo className="mr-1" />
+          <Link to="/video-call" className="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+            <FaVideo className="mr-2" /> Video
           </Link>
         </nav>
+        <div className="flex items-center space-x-4">
         <button
           onClick={() => setDark(!dark)}
-          className="flex ml-4 mr-5 items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md hover:scale-110 transition-transform duration-200"
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 shadow-inner hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300"
           aria-label="Toggle Dark Mode"
         >
           {dark ? (
@@ -135,14 +136,15 @@ function App() {
         {username && (
           <button
             onClick={handleLogout}
-            className="flex mr-5 items-center justify-center w-auto px-4 py-2 rounded-full bg-red-500 text-white shadow-md hover:scale-110 transition-transform duration-200"
+            className="flex items-center justify-center w-auto px-4 py-2 rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 transition-colors duration-300"
             aria-label="Logout"
           >
-            Logout 
+            Logout
           </button>
         )}
+        </div>
       </header>
-      <div className="flex flex-grow">
+      <div className="flex flex-col h-screen md:flex-row flex-grow overflow-hidden">
         <Sidebar
           onlineUsers={onlineUsers}
           handleStartVideoCall={handleStartVideoCall}
@@ -152,7 +154,7 @@ function App() {
           acceptCall={acceptCall}
           declineCall={declineCall}
         />
-        <main className="flex-grow">
+        <main className="flex-grow h-screen">
           <Routes>
             <Route path="/home" element={<Home />} />
             <Route path="/chat" element={<ChatPage socket={socket} />} /> {/* No need to pass selectedChatRecipient, ChatPage reads from URL */}

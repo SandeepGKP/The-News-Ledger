@@ -13,7 +13,7 @@ export default function ChatPage({ socket }) {
   }, [recipient]);
 
   return (
-    <div className="flex-grow p-4">
+    <div className="flex-grow p-4 h-full mt-4">
       {/* <h2 className="text-2xl font-bold mb-4">Chat {chatRecipient ? `with ${chatRecipient}` : ''}</h2> */}
       <Chat recipient={chatRecipient} socket={socket} />
     </div>
