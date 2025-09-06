@@ -138,7 +138,6 @@ io.on('connection', (socket) => {
         recipientSocketIds.forEach(socketId => {
           io.to(socketId).emit('receiveMessage', message); // Send to all recipient's sockets
         });
-        io.to(socket.id).emit('receiveMessage', message); // Send to sender
       } else {
         console.log(`Recipient ${message.recipient} not found or not online.`);
         // Optionally, send an error message back to the sender
