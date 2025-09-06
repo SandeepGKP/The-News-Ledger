@@ -6,7 +6,7 @@ import VideoCallPage from './VideoCallPage';
 import Sidebar from './Sidebar';
 import io from 'socket.io-client';
 
-import { FaVideo,FaCommentDots, FaHome } from 'react-icons/fa'; // Import icons for navigation
+import { FaVideo,FaCommentDots } from 'react-icons/fa'; // Import icons for navigation
 import { FaNewspaper } from "react-icons/fa";
 
 const socket = io('https://the-news-ledger.onrender.com');
@@ -19,10 +19,16 @@ function App() {
   const [caller, setCaller] = useState('');
   const [callerSignal, setCallerSignal] = useState();
   const [callRoomName, setCallRoomName] = useState('');
-  const [username, setUsername] = useState(localStorage.getItem('username'));
+  const [username, setUsername] = useState(null); // Initialize to null
   const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
+    // Read username from localStorage after component mounts
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+
     const handleStorageChange = () => {
       setUsername(localStorage.getItem('username'));
     };
@@ -32,7 +38,7 @@ function App() {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, []); // Empty dependency array, runs once on mount
 
   const handleLogout = () => {
     localStorage.removeItem('username');
@@ -40,7 +46,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (username) {
+    if (username) { // This will now correctly fire when username is set
       socket.emit('userLoggedIn', username);
     }
 
