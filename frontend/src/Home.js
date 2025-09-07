@@ -4,6 +4,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { ToastContainer, toast } from 'react-toastify';
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 
 const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
@@ -163,7 +164,7 @@ export default function Home() {
             </div>
             <button onClick={() => fetchNews()} className="px-3 py-1 bg-blue-600 text-white rounded">Search</button>
             <button onClick={handleVoiceSearch} className="px-3 py-1 bg-green-600 text-white rounded">🎤</button>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 text-white rounded">
               <option value="general">General</option>
               <option value="technology">Technology</option>
               <option value="science">Science</option>
@@ -172,10 +173,22 @@ export default function Home() {
               <option value="entertainment">Entertainment</option>
               <option value="business">Business</option>
             </select>
-            <select value={country} onChange={(e) => setCountry(e.target.value)} className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">
+            <select value={country} onChange={(e) => setCountry(e.target.value)} className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 text-white rounded">
               <option value="in">India</option>
               <option value="us">USA</option>
               <option value="gb">UK</option>
+              <option value="ca">Canada</option>
+              <option value="au">Australia</option>
+              <option value="de">Germany</option>
+              <option value="fr">France</option>
+              <option value="it">Italy</option>
+              <option value="es">Spain</option>
+              <option value="jp">Japan</option>
+              <option value="cn">China</option>
+              <option value="br">Brazil</option>
+              <option value="za">South Africa</option>
+              <option value="ru">Russia</option>
+              <option value="ae">United Arab Emirates</option>
             </select>
             <div className="relative ml-auto">
               <button
@@ -209,7 +222,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {news.slice(0,9).map((article, idx) => (
+            {news.slice(0, 9).map((article, idx) => (
               <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col">
                 {article.image && <img src={article.image} alt="News" className="rounded w-full h-40 object-cover" />}
                 <h2 className="font-bold text-md mt-2 flex-grow text-white">{article.title}</h2>
@@ -223,24 +236,23 @@ export default function Home() {
             ))}
           </div>
         )}
-
-        <div className="mt-4 flex justify-center gap-2 items-center">
+      </div>
+      <div className="mt-4 flex justify-center gap-2 items-center relative">
           <button
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50 text-blue-300"
             disabled={page === 1}
           >
-            Prev
+            <ArrowLeft/>
           </button>
           <span className="px-3 py-1">{page}</span>
           <button
             onClick={() => setPage((prev) => prev + 1)}
-            className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded"
+            className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded text-blue-300"
           >
-            Next
+            <ArrowRight/>
           </button>
         </div>
-      </div>
     </div>
   );
 }
