@@ -142,7 +142,7 @@ export default function Home() {
               <input
                 type="text"
                 placeholder="Search..."
-                className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 placeholder-slate-600 rounded"
+                className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 placeholder-slate-600 rounded text-white"
                 value={listening ? transcript : query}
                 onChange={handleSearchInputChange}
                 onFocus={() => setShowSuggestions(true)}
@@ -225,8 +225,8 @@ export default function Home() {
             {news.slice(0, 9).map((article, idx) => (
               <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col">
                 {article.image && <img src={article.image} alt="News" className="rounded w-full h-40 object-cover" />}
-                <h2 className="font-bold text-md mt-2 flex-grow text-white">{article.title}</h2>
-                <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">{article.description?.substring(0, 100)}...</p>
+                <h2 className="font-serif text-md mt-2 flex-grow text-white">{article.title}</h2>
+                <p className="text-sm mt-1 text-gray-600 dark:text-gray-400 font-serif">{article.description?.substring(0, 100)}...</p>
                 <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 mt-2 inline-block text-sm" onClick={() => handleView(article.url)}>Read More</a>
                 <div className="flex justify-between items-center mt-2">
                   <button onClick={() => handleBookmark(article)} className="text-sm text-yellow-500">Bookmark</button>

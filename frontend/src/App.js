@@ -5,8 +5,9 @@ import ChatPage from './ChatPage';
 import VideoCallPage from './VideoCallPage';
 import Sidebar from './Sidebar';
 import io from 'socket.io-client';
+import { LogOut } from 'lucide-react'
 
-import { FaVideo,FaCommentDots } from 'react-icons/fa'; // Import icons for navigation
+import { FaVideo, FaCommentDots } from 'react-icons/fa'; // Import icons for navigation
 import { FaNewspaper } from "react-icons/fa";
 
 const socket = io('https://the-news-ledger.onrender.com');
@@ -162,11 +163,17 @@ function App() {
           {username && (
             <button
               onClick={handleLogout}
-              className="flex items-center justify-center w-auto px-4 py-2 rounded-full bg-red-400 text-white shadow-md hover:bg-red-600 transition-colors duration-300"
+              className="relative group flex items-center justify-center w-auto px-4 py-2 rounded-full text-white shadow-md  transition-colors duration-300"
               aria-label="Logout"
             >
-              Logout
+              <LogOut />
+
+              {/* Tooltip */}
+              <span className="absolute top-full mb-1 px-2  text-xs rounded text-white opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                Logout
+              </span>
             </button>
+
           )}
         </div>
       </header>
