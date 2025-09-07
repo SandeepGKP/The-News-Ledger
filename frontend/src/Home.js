@@ -142,7 +142,7 @@ export default function Home() {
               <input
                 type="text"
                 placeholder="Search..."
-                className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 placeholder-slate-600 rounded text-white"
+                className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 placeholder-slate-400 rounded text-white"
                 value={listening ? transcript : query}
                 onChange={handleSearchInputChange}
                 onFocus={() => setShowSuggestions(true)}
@@ -218,7 +218,7 @@ export default function Home() {
           </div>
         ) : news.length === 0 ? (
           <div className="text-center text-yellow-500 mt-10 text-xl">
-            {error ? "Error fetching news. Please try again." : "No articles found matching your search."}
+            {error ? "Server Error fetching news. Please try again." : "No articles found matching your search."}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
