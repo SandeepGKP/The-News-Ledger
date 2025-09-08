@@ -10,7 +10,7 @@ export default function VideoCallPage() {
   const callerSignal = callerSignalString ? JSON.parse(callerSignalString) : null;
 
   return (
-    <div className="h-full">
+    <div className="h-ful">
       {roomName ? (
         <VideoCall roomName={roomName} callerSignal={callerSignal} />
       ) : (
