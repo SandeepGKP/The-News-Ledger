@@ -5,9 +5,10 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { ToastContainer, toast } from 'react-toastify';
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { FaMicrophone } from 'react-icons/fa';
 
 
-const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
 export default function Home() {
   const [news, setNews] = useState([]);
@@ -22,6 +23,7 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [error, setError] = useState(false);
+
 
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
@@ -102,11 +104,13 @@ export default function Home() {
   };
 
   const handleVoiceSearch = () => {
+    beep.playbackRate=0.4;
     beep.play();
     setTimeout(() => {
       resetTranscript();
       SpeechRecognition.startListening({ continuous: false, language: 'en-IN' });
     }, 1000);
+
   };
 
   const handleBookmark = (article) => {
@@ -169,7 +173,8 @@ export default function Home() {
               )}
             </div>
             <button onClick={() => fetchNews()} className="px-3 py-1 bg-blue-600 text-white rounded">Search</button>
-            <button onClick={handleVoiceSearch} className="px-3 py-1 bg-green-600 text-white rounded">🎤</button>
+            <button onClick={handleVoiceSearch} className="px-3 py-1 bg-green-600 rounded "><FaMicrophone size={24} /></button>
+            
             <select value={category} onChange={(e) => setCategory(e.target.value)} className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 text-white rounded">
               <option value="general">General</option>
               <option value="technology">Technology</option>
