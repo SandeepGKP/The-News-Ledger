@@ -57,13 +57,13 @@ export default function Home() {
   useEffect(() => {
     const handler = setTimeout(() => {
       fetchNews();
-    }, 500); // debounce delay in ms
+    }, 1000); // debounce delay in ms
 
     // cleanup to cancel previous timeout if dependency changes
     return () => clearTimeout(handler);
   }, [fetchNews]);
 
-  
+
   useEffect(() => {
     const storedBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
     setBookmarks(storedBookmarks);
@@ -227,10 +227,10 @@ export default function Home() {
             {error ? "Server Error fetching news. Please try again." : "No articles found matching your search."}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {news.slice(0, 9).map((article, idx) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
+            {news.slice(0, 10).map((article, idx) => (
               <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col">
-                {article.image && <img src={article.image} alt="News" className="rounded w-full h-40 object-cover" />}
+                {article.image && <img src={article.image} alt="News" className="rounded w-full h-70 object-cover" />}
                 <h2 className="font-serif text-md mt-2 flex-grow text-white">{article.title}</h2>
                 <p className="text-sm mt-1 text-gray-600 dark:text-gray-400 font-serif">{article.description?.substring(0, 100)}...</p>
                 <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 mt-2 inline-block text-sm" onClick={() => handleView(article.url)}>Read More</a>
