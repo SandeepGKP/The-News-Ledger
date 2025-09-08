@@ -243,10 +243,10 @@ export default function Home() {
           </div>
         )}
       </div>
-      <div className="mt-4 flex justify-center gap-2 items-center relative">
+      <div className="mt-2 flex justify-center gap-2 items-center relative ">
         <button
           onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50 text-blue-300"
+          className="px-3 py-1  rounded disabled:opacity-50 text-blue-300"
           disabled={page === 1}
         >
           <ArrowLeft />
@@ -254,7 +254,7 @@ export default function Home() {
         <span className="px-3 py-1">{page}</span>
         <button
           onClick={() => setPage((prev) => prev + 1)}
-          className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded text-blue-300"
+          className="px-3 py-1  rounded text-blue-300"
         >
           <ArrowRight />
         </button>
