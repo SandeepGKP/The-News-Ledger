@@ -10,19 +10,26 @@ const Login = ({ onLogin }) => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    try {
-      const res = await axios.post('https://the-news-ledger.onrender.com/api/login', 
-        { usernameOrEmail, password } );
-        toast.success("Login successful!");
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('username', res.data.username); // Use username directly from login response
-      navigate('/home');
-    } catch (err) {
-      console.error("Login failed: ", err);
-      toast.error(err.response?.data?.message || "Login failed!");
+  try {
+    const res = await axios.post('https://the-news-ledger.onrender.com/api/login', 
+      { usernameOrEmail, password } );
+      
+    toast.success("Login successful!");
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('token', res.data.token);
+    localStorage.setItem('username', res.data.username); 
+
+    if (onLogin) {
+      onLogin(res.data); // ✅ update parent/auth state immediately
     }
-  };
+
+    navigate('/home');
+  } catch (err) {
+    console.error("Login failed: ", err);
+    toast.error(err.response?.data?.message || "Login failed!");
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 to-blue-400">
