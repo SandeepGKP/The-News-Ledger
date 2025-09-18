@@ -25,7 +25,7 @@ export default function Sidebar({ onlineUsers, handleStartVideoCall, handleStart
           </div>
         )}
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
-          <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+          <span className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse"></span>
           Online Users ({onlineUsers.length})
         </h3>
       </div>
@@ -35,7 +35,6 @@ export default function Sidebar({ onlineUsers, handleStartVideoCall, handleStart
           {onlineUsers.length > 0 ? (
             onlineUsers.map((user, idx) => (
               <div key={idx} className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 flex justify-between items-center">
-                <span className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse"></span>
                 <span className="font-medium text-gray-700 dark:text-gray-200">{user}</span>
                 <div className="flex gap-2">
                   <button
