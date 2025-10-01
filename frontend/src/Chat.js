@@ -9,23 +9,73 @@ const getChatId = (user1, user2) => {
 };
 
 export default function Chat({ recipient, socket }) {
-  // Load messages from localStorage on mount, persist to localStorage on change
-  const loadMessagesFromStorage = () => {
-    const storedMessages = localStorage.getItem('chatMessages');
-    return storedMessages ? JSON.parse(storedMessages) : {};
+  // IndexedDB setup for chat messages
+  const DB_NAME = 'ChatDB';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'chatMessages';
+
+  // Initialize IndexedDB
+  const initDB = () => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        }
+      };
+    });
   };
 
-  const saveMessagesToStorage = (messages) => {
-    localStorage.setItem('chatMessages', JSON.stringify(messages));
+  // Load messages from IndexedDB
+  const loadMessagesFromStorage = async () => {
+    try {
+      const db = await initDB();
+      const transaction = db.transaction([STORE_NAME], 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get('chatMessages');
+
+      return new Promise((resolve) => {
+        request.onsuccess = () => {
+          resolve(request.result ? request.result.data : {});
+        };
+        request.onerror = () => resolve({});
+      });
+    } catch (error) {
+      console.error('Error loading from IndexedDB:', error);
+      return {};
+    }
   };
 
-  const [allMessages, setAllMessages] = useState(loadMessagesFromStorage()); // Stores messages for all chats
+  // Save messages to IndexedDB
+  const saveMessagesToStorage = async (messages) => {
+    try {
+      const db = await initDB();
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      await store.put({ id: 'chatMessages', data: messages });
+    } catch (error) {
+      console.error('Error saving to IndexedDB:', error);
+    }
+  };
+
+  const [allMessages, setAllMessages] = useState({}); // Stores messages for all chats
   const [messageInput, setMessageInput] = useState('');
   const [replyingTo, setReplyingTo] = useState(null); // Store message being replied to
   const username = localStorage.getItem('username'); // Get username from localStorage
   const messagesEndRef = useRef(null); // Ref for scrolling to the bottom of messages
 
-  // Save messages to localStorage whenever allMessages changes
+  // Load messages from IndexedDB on component mount
+  useEffect(() => {
+    loadMessagesFromStorage().then((messages) => {
+      setAllMessages(messages);
+    });
+  }, []);
+
+  // Save messages to IndexedDB whenever allMessages changes
   useEffect(() => {
     saveMessagesToStorage(allMessages);
   }, [allMessages]);
