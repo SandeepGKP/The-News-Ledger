@@ -13,7 +13,7 @@ import { FaNewspaper } from "react-icons/fa";
 const socket = io('https://the-news-ledger.onrender.com');
 
 function App() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   const [videoRoomName, setVideoRoomName] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [receivingCall, setReceivingCall] = useState(false);
@@ -119,7 +119,7 @@ function App() {
             <FaCommentDots className="mr-2" /> Chat
           </Link>
           <Link to="/video-call" className="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-            <FaVideo className="mr-2" /> Video
+            <FaVideo className="mr-2" /> Video Call
           </Link>
         </nav>
         <div className="flex items-center space-x-4">

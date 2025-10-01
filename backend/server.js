@@ -64,7 +64,7 @@ app.post('/api/login', async (req, res) => {
   const { usernameOrEmail, password } = req.body;
   // Allow login with either username or email
   const user = await User.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] });
-  if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+  if (!user) return res.status(400).json({ message: 'User does not exist' });
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
