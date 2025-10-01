@@ -65,6 +65,8 @@ export default function Chat({ recipient, socket }) {
   const [allMessages, setAllMessages] = useState({}); // Stores messages for all chats
   const [messageInput, setMessageInput] = useState('');
   const [replyingTo, setReplyingTo] = useState(null); // Store message being replied to
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // Control delete confirmation modal
+  const [messageToDelete, setMessageToDelete] = useState(null); // Store message to be deleted
   const username = localStorage.getItem('username'); // Get username from localStorage
   const messagesEndRef = useRef(null); // Ref for scrolling to the bottom of messages
 
@@ -148,15 +150,44 @@ export default function Chat({ recipient, socket }) {
     }
   };
 
-  const deleteMessage = (messageId) => {
-    setAllMessages((prevAllMessages) => {
-      const chatId = getChatId(username, recipient);
-      return {
-        ...prevAllMessages,
-        [chatId]: prevAllMessages[chatId].filter(msg => msg.id !== messageId),
-      };
-    });
-    socket.emit('deleteMessage', { messageId, chatId: getChatId(username, recipient) });
+  const deleteMessage = (message) => {
+    setMessageToDelete(message);
+    setShowDeleteModal(true);
+  };
+
+  const deleteForEveryone = () => {
+    if (messageToDelete) {
+      setAllMessages((prevAllMessages) => {
+        const chatId = getChatId(username, recipient);
+        return {
+          ...prevAllMessages,
+          [chatId]: prevAllMessages[chatId].filter(msg => msg.id !== messageToDelete.id),
+        };
+      });
+      socket.emit('deleteMessage', { messageId: messageToDelete.id, chatId: getChatId(username, recipient) });
+    }
+    setShowDeleteModal(false);
+    setMessageToDelete(null);
+  };
+
+  const deleteForMe = () => {
+    if (messageToDelete) {
+      setAllMessages((prevAllMessages) => {
+        const chatId = getChatId(username, recipient);
+        return {
+          ...prevAllMessages,
+          [chatId]: prevAllMessages[chatId].filter(msg => msg.id !== messageToDelete.id),
+        };
+      });
+      // No socket emission, so other users still see the message
+    }
+    setShowDeleteModal(false);
+    setMessageToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setMessageToDelete(null);
   };
 
   const replyToMessage = (message) => {
@@ -203,15 +234,13 @@ export default function Chat({ recipient, socket }) {
                   >
                     <FaReply size={10} />
                   </button>
-                  {isMyMessage && (
-                    <button
-                      onClick={() => deleteMessage(msg.id)}
-                      className="p-1 rounded-full hover:bg-red-500 hover:bg-opacity-20 transition-colors"
-                      title="Delete"
-                    >
-                      <X size={10} />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => deleteMessage(msg)}
+                    className="p-1 rounded-full hover:bg-red-500 hover:bg-opacity-20 transition-colors"
+                    title="Delete"
+                  >
+                    <X size={10} />
+                  </button>
                 </div>
                 <div className="pr-16">
                   {msg.replyTo && (
@@ -268,6 +297,52 @@ export default function Chat({ recipient, socket }) {
           </button>
         </form>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-full mx-4 overflow-hidden">
+            {/* Message Preview */}
+            {messageToDelete && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+                <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">Delete message?</div>
+                <div className="bg-white dark:bg-gray-600 p-3 rounded-lg border dark:border-gray-500 max-w-xs">
+                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                    {messageToDelete.sender === username ? 'You' : messageToDelete.sender}
+                  </div>
+                  <div className="text-sm text-gray-700 dark:text-gray-200">
+                    {messageToDelete.text}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-col">
+              <button
+                onClick={deleteForEveryone}
+                className="w-full px-4 py-4 text-left text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-b dark:border-gray-600 text-sm font-medium flex items-center"
+              >
+                <X size={16} className="mr-3" />
+                Delete for everyone
+              </button>
+              <button
+                onClick={deleteForMe}
+                className="w-full px-4 py-4 text-left text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-b dark:border-gray-600 text-sm font-medium flex items-center"
+              >
+                <X size={16} className="mr-3" />
+                Delete for me
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="w-full px-4 py-4 text-left text-gray-900 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
