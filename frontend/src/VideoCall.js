@@ -5,6 +5,14 @@ import { FaVideo, FaMicrophone, FaMicrophoneSlash, FaVideoSlash, FaPhoneSlash } 
 
 const socket = io('https://the-news-ledger.onrender.com');
 
+// Send userLoggedIn when socket connects to associate username
+socket.on('connect', () => {
+  const username = localStorage.getItem('username');
+  if (username) {
+    socket.emit('userLoggedIn', username);
+  }
+});
+
 const servers = {
   iceServers: [
     {
@@ -89,10 +97,12 @@ export default function VideoCall({ roomName, callerSignal }) {
     startCall();
 
     socket.on('userJoined', async ({ peerId, username }) => {
+      setUsernames((prev) => ({ ...prev, [peerId]: username }));
       await createPeerConnection(peerId, username);
     });
 
     socket.on('offer', async (offer, { peerId, username }) => {
+      setUsernames((prev) => ({ ...prev, [peerId]: username }));
       const pc = await createPeerConnection(peerId, username);
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await pc.createAnswer();

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion'; // Import motion
-import { FaPaperPlane } from 'react-icons/fa';
+import { FaPaperPlane, FaReply } from 'react-icons/fa';
+import { X } from 'lucide-react';
 
 // Helper function to create a consistent chat ID
 const getChatId = (user1, user2) => {
@@ -8,10 +9,26 @@ const getChatId = (user1, user2) => {
 };
 
 export default function Chat({ recipient, socket }) {
-  const [allMessages, setAllMessages] = useState({}); // Stores messages for all chats
+  // Load messages from localStorage on mount, persist to localStorage on change
+  const loadMessagesFromStorage = () => {
+    const storedMessages = localStorage.getItem('chatMessages');
+    return storedMessages ? JSON.parse(storedMessages) : {};
+  };
+
+  const saveMessagesToStorage = (messages) => {
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
+  };
+
+  const [allMessages, setAllMessages] = useState(loadMessagesFromStorage()); // Stores messages for all chats
   const [messageInput, setMessageInput] = useState('');
+  const [replyingTo, setReplyingTo] = useState(null); // Store message being replied to
   const username = localStorage.getItem('username'); // Get username from localStorage
   const messagesEndRef = useRef(null); // Ref for scrolling to the bottom of messages
+
+  // Save messages to localStorage whenever allMessages changes
+  useEffect(() => {
+    saveMessagesToStorage(allMessages);
+  }, [allMessages]);
 
   useEffect(() => {
     if (!socket) return;
@@ -26,8 +43,21 @@ export default function Chat({ recipient, socket }) {
       });
     });
 
+    socket.on('messageDeleted', ({ messageId, chatId }) => {
+      setAllMessages((prevAllMessages) => {
+        if (prevAllMessages[chatId]) {
+          return {
+            ...prevAllMessages,
+            [chatId]: prevAllMessages[chatId].filter(msg => msg.id !== messageId),
+          };
+        }
+        return prevAllMessages;
+      });
+    });
+
     return () => {
       socket.off('receiveMessage');
+      socket.off('messageDeleted');
     };
   }, [username, socket]); // Depend on username to re-emit userLoggedIn if it changes
 
@@ -39,11 +69,18 @@ export default function Chat({ recipient, socket }) {
   const sendMessage = (e) => {
     e.preventDefault();
     if (messageInput.trim() && recipient) {
+      const messageId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
       const messageData = {
+        id: messageId,
         sender: username,
         recipient: recipient,
         text: messageInput,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        replyTo: replyingTo ? {
+          id: replyingTo.id,
+          sender: replyingTo.sender,
+          text: replyingTo.text
+        } : null,
       };
 
       // Add message to local state immediately
@@ -57,7 +94,27 @@ export default function Chat({ recipient, socket }) {
 
       socket.emit('sendMessage', messageData);
       setMessageInput('');
+      setReplyingTo(null);
     }
+  };
+
+  const deleteMessage = (messageId) => {
+    setAllMessages((prevAllMessages) => {
+      const chatId = getChatId(username, recipient);
+      return {
+        ...prevAllMessages,
+        [chatId]: prevAllMessages[chatId].filter(msg => msg.id !== messageId),
+      };
+    });
+    socket.emit('deleteMessage', { messageId, chatId: getChatId(username, recipient) });
+  };
+
+  const replyToMessage = (message) => {
+    setReplyingTo(message);
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
   };
 
   const currentChatId = recipient ? getChatId(username, recipient) : null;
@@ -75,23 +132,49 @@ export default function Chat({ recipient, socket }) {
           const isMyMessage = msg.sender === username;
           return (
             <motion.div
-              key={index}
+              key={msg.id || index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               className={`flex items-end gap-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-md p-3 rounded-2xl shadow ${
+                className={`max-w-md p-3 rounded-2xl shadow relative ${
                   isMyMessage
                     ? 'bg-blue-500 text-white rounded-br-lg '
                     : 'bg-gray-200 text-gray-800 rounded-bl-lg dark:bg-gray-700 dark:text-gray-200'
                 }`}
               >
-                {!isMyMessage && <div className="font-bold text-sm mb-1 text-blue-600 dark:text-blue-400">{msg.sender}</div>}
-                <p className="text-base break-words">{msg.text}</p>
-                <div className={`text-xs mt-2 ${isMyMessage ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'} text-right`}>
-                  {msg.timestamp}
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <button
+                    onClick={() => replyToMessage(msg)}
+                    className={`p-1 rounded-full hover:bg-opacity-20 ${isMyMessage ? 'hover:bg-white' : 'hover:bg-gray-400'} transition-colors`}
+                    title="Reply"
+                  >
+                    <FaReply size={10} />
+                  </button>
+                  {isMyMessage && (
+                    <button
+                      onClick={() => deleteMessage(msg.id)}
+                      className="p-1 rounded-full hover:bg-red-500 hover:bg-opacity-20 transition-colors"
+                      title="Delete"
+                    >
+                      <X size={10} />
+                    </button>
+                  )}
+                </div>
+                <div className="pr-16">
+                  {msg.replyTo && (
+                    <div className={`mb-2 p-2 rounded border-l-4 ${isMyMessage ? 'border-blue-300 bg-blue-600 text-blue-100' : 'border-gray-300 bg-gray-100 dark:bg-gray-600 dark:text-gray-300'} text-sm`}>
+                      <div className="font-semibold">{msg.replyTo.sender}</div>
+                      <div className="truncate">{msg.replyTo.text}</div>
+                    </div>
+                  )}
+                  {!isMyMessage && <div className="font-bold text-sm mb-1 text-blue-600 dark:text-blue-400">{msg.sender}</div>}
+                  <p className="text-base break-words">{msg.text}</p>
+                  <div className={`text-xs mt-2 ${isMyMessage ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {msg.timestamp}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -100,13 +183,30 @@ export default function Chat({ recipient, socket }) {
         <div ref={messagesEndRef} />
       </div>
       <div className="p-4 border-t dark:border-gray-700">
+        {replyingTo && (
+          <div className="mb-2 p-2 bg-blue-100 dark:bg-gray-700 rounded-lg border-l-4 border-blue-500">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <span className="font-semibold">Replying to {replyingTo.sender}: </span>
+                <span className="truncate block max-w-md">{replyingTo.text}</span>
+              </div>
+              <button
+                onClick={cancelReply}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
+                title="Cancel reply"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
         <form onSubmit={sendMessage} className="flex items-center gap-3">
           <input
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            className="flex-1 bg-gray-100 text-white dark:bg-gray-800 border-transparent rounded-full px-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow duration-200"
-            placeholder={recipient ? `Message ${recipient}...` : 'Select a user to chat with...'}
+            className="flex-1 bg-gray-100 text-black dark:bg-gray-800 dark:text-white border-transparent rounded-full px-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow duration-200"
+            placeholder={replyingTo ? `Reply to ${replyingTo.sender}...` : recipient ? `Message ${recipient}...` : 'Select a user to chat with...'}
             disabled={!recipient}
           />
           <button

@@ -148,6 +148,21 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Handle delete message
+  socket.on('deleteMessage', (data) => {
+    const { messageId, chatId } = data;
+    console.log(`Deleting message ${messageId} in chat ${chatId}`);
+    // Get all users in this chat by finding both participants in chatId (format: user1-user2)
+    const participants = chatId.split('-');
+    participants.forEach(participant => {
+      if (users[participant]) {
+        users[participant].forEach(socketId => {
+          io.to(socketId).emit('messageDeleted', { messageId, chatId });
+        });
+      }
+    });
+  });
+
   // Handle video call invitations
   socket.on('callUser', ({ userToCall, roomName, signalData }) => {
     const callerId = socket.id;

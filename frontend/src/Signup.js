@@ -51,6 +51,8 @@ function Signup() {
           <p className="text-gray-500 mb-6">Create your account and start exploring the news world!</p>
           <form onSubmit={handleSignup} className="space-y-4">
             <input
+              type="text"
+              minLength={5}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="User Name"
