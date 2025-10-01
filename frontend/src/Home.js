@@ -250,6 +250,7 @@ export default function Home() {
               <div className="flex items-center  gap-3 p-4 rounded-lg bg-grey-50 text-red-600 text-lg shadow-md">
                 <BiErrorCircle className="text-2xl" />
                 <span>Server Error fetching news. Please try again.</span>
+                
               </div>
             ) : (
               <div className="flex items-center gap-3 p-4 rounded-lg bg-grey-50 text-yellow-600 text-lg shadow-md">
