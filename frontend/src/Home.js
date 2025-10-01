@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import Skeleton from 'react-loading-skeleton';
+
 import 'react-loading-skeleton/dist/skeleton.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { ToastContainer, toast } from 'react-toastify';
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { FaMicrophone } from 'react-icons/fa';
+import { BiErrorCircle } from "react-icons/bi";
+import { MdSearchOff } from "react-icons/md";
 
 
 const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
@@ -104,7 +106,7 @@ export default function Home() {
   };
 
   const handleVoiceSearch = () => {
-    beep.playbackRate=0.4;
+    beep.playbackRate = 0.4;
     beep.play();
     setTimeout(() => {
       resetTranscript();
@@ -174,7 +176,7 @@ export default function Home() {
             </div>
             <button onClick={() => fetchNews()} className="px-3 py-1 bg-blue-600 text-white rounded">Search</button>
             <button onClick={handleVoiceSearch} className="px-3 py-1 bg-green-600 rounded "><FaMicrophone size={24} /></button>
-            
+
             <select value={category} onChange={(e) => setCategory(e.target.value)} className="border px-2 py-1 bg-gray-200 dark:bg-gray-700 text-white rounded">
               <option value="general">General</option>
               <option value="technology">Technology</option>
@@ -224,13 +226,39 @@ export default function Home() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} height={300} />)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4 text-slate-300 animate-pulse">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-3">
+                {/* Thumbnail */}
+                <div className="w-full h-96 rounded-xl bg-slate-200 dark:bg-slate-700" />
+
+                {/* Channel avatar + text */}
+                <div className="flex gap-3">
+                  {/* <div className="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700" /> */}
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
+                    <div className="h-3 w-1/2 rounded bg-slate-200 dark:bg-slate-700" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
+
         ) : news.length === 0 ? (
-          <div className="text-center text-yellow-500 mt-10 text-xl">
-            {error ? "Server Error fetching news. Please try again." : "No articles found matching your search."}
+          <div className="flex items-center justify-center h-[70vh] text-xl  text-yellow-500">
+            {error ? (
+              <div className="flex items-center  gap-3 p-4 rounded-lg bg-grey-50 text-red-600 text-lg shadow-md">
+                <BiErrorCircle className="text-2xl" />
+                <span>Server Error fetching news. Please try again.</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-grey-50 text-yellow-600 text-lg shadow-md">
+                <MdSearchOff className="text-2xl" />
+                <span>No articles found matching your search.</span>
+              </div>
+            )}
           </div>
+
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
             {news.slice(0, 10).map((article, idx) => (
@@ -248,22 +276,23 @@ export default function Home() {
           </div>
         )}
       </div>
-      <div className="mt-2 flex justify-center gap-2 items-center relative ">
-        <button
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          className="px-3 py-1  rounded disabled:opacity-50 text-blue-300"
-          disabled={page === 1}
-        >
-          <ArrowLeft />
-        </button>
-        <span className="px-3 py-1">{page}</span>
-        <button
-          onClick={() => setPage((prev) => prev + 1)}
-          className="px-3 py-1  rounded text-blue-300"
-        >
-          <ArrowRight />
-        </button>
-      </div>
+      {(news.length !== 0) &&
+        (<div className="mt-2 flex justify-center gap-2 items-center relative ">
+          <button
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            className="px-3 py-1  rounded disabled:opacity-50 text-blue-300"
+            disabled={page === 1}
+          >
+            <ArrowLeft />
+          </button>
+          <span className="px-3 py-1">{page}</span>
+          <button
+            onClick={() => setPage((prev) => prev + 1)}
+            className="px-3 py-1  rounded text-blue-300"
+          >
+            <ArrowRight />
+          </button>
+        </div>)}
     </div>
   );
 }

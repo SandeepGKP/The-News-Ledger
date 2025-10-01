@@ -3,7 +3,7 @@ import { FaVideo, FaCommentDots } from 'react-icons/fa';
 
 export default function Sidebar({ onlineUsers, handleStartVideoCall, handleStartChat, receivingCall, caller, acceptCall, declineCall }) {
   return (
-    <div className="w-full md:w-1/4 bg-gray-50 dark:bg-gray-800 flex flex-col h-full border-r dark:border-gray-700">
+    <div className="w-auto md:w-auto bg-gray-50 dark:bg-gray-800 flex flex-col h-full border-r dark:border-gray-700">
       <div className="p-6 border-b dark:border-gray-700">
         {receivingCall && (
           <div className="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg shadow-lg text-center border border-blue-200 dark:border-blue-700 mb-4">
