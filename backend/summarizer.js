@@ -1,25 +1,25 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 const summarizeText = async (text) => {
   try {
-    // Log available models
-    console.log('Available models:');
-    try {
-      const models = await genAI.listModels();
-      models.forEach(model => {
-        console.log(model.name);
-      });
-    } catch (listError) {
-      console.error('Error listing models:', listError);
-    }
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: `Summarize the following news article in 2-3 sentences: ${text}`,
+        },
+      ],
+      model: 'mixtral-8x7b-32768',
+      temperature: 0.5,
+      max_tokens: 1024,
+      top_p: 1,
+    });
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.0-pro' });
-    const prompt = `Summarize the following news article in 2-3 sentences: ${text}`;
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    return response.text();
+    return chatCompletion.choices[0]?.message?.content || 'Summary not available.';
   } catch (error) {
     console.error('Error summarizing:', error);
     throw new Error('Failed to generate summary');
