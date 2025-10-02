@@ -13,7 +13,7 @@ const summarizeText = async (text) => {
           content: `Summarize the following news article in 2-3 sentences: ${text}`,
         },
       ],
-      model: 'mixtral-8x7b-32768',
+      model: 'llama3-8b-8192',
       temperature: 0.5,
       max_tokens: 1024,
       top_p: 1,
@@ -21,7 +21,7 @@ const summarizeText = async (text) => {
 
     return chatCompletion.choices[0]?.message?.content || 'Summary not available.';
   } catch (error) {
-    console.error('Error summarizing:', error);
+    console.error('Error summarizing:', error.message || error);
     throw new Error('Failed to generate summary');
   }
 };
