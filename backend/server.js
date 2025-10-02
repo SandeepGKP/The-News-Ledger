@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const { summarizeText } = require('./summarizer');
 dotenv.config();
 
 const app = express();
@@ -108,7 +109,22 @@ app.get('/api/news', async (req, res) => {
     console.error('API Error:', error.response ? error.response.data : error.message); // Log full error response
     res.status(500).json({ error: 'Failed to fetch news', details: error.response ? error.response.data : error.message });
   }
-  
+
+});
+
+// Summarization endpoint
+app.post('/api/summarize', async (req, res) => {
+  const { text } = req.body;
+  if (!text) {
+    return res.status(400).json({ error: 'Text is required for summarization' });
+  }
+
+  try {
+    const summary = await summarizeText(text);
+    res.json({ summary });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to generate summary' });
+  }
 });
 
 const users = {}; // Store active users: { username: [socketId1, socketId2, ...] }

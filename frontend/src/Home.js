@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { FaMicrophone } from 'react-icons/fa';
 import { BiErrorCircle } from "react-icons/bi";
 import { MdSearchOff } from "react-icons/md";
+import Summarizer from './Summarizer';
 
 
 const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
@@ -25,6 +26,7 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [error, setError] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState(null);
 
 
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
@@ -250,7 +252,7 @@ export default function Home() {
               <div className="flex items-center  gap-3 p-4 rounded-lg bg-grey-50 text-red-600 text-lg shadow-md">
                 <BiErrorCircle className="text-2xl" />
                 <span>Server Error fetching news. Please try again.</span>
-                
+
               </div>
             ) : (
               <div className="flex items-center gap-3 p-4 rounded-lg bg-grey-50 text-yellow-600 text-lg shadow-md">
@@ -264,10 +266,13 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
             {news.slice(0, 10).map((article, idx) => (
               <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col">
-                {article.image && <img src={article.image} alt="News" className="rounded w-full h-70 object-cover" />}
+                {article.image && <img src={article.image} alt="News" className="rounded w-auto h-70 object-cover" />}
                 <h2 className="font-serif text-md mt-2 flex-grow text-white">{article.title}</h2>
                 <p className="text-sm mt-1 text-gray-600 dark:text-gray-400 font-serif">{article.description?.substring(0, 100)}...</p>
-                <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 mt-2 inline-block text-sm" onClick={() => handleView(article.url)}>Read More</a>
+                <div className="mt-2">
+                  <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 inline-block text-sm" onClick={() => handleView(article.url)}>Read More</a>
+                  <button onClick={() => setSelectedArticle(article)} className="text-green-500 ml-4 inline-block text-sm">Summarize</button>
+                </div>
                 <div className="flex justify-between items-center mt-2">
                   <button onClick={() => handleBookmark(article)} className="text-sm text-yellow-500">Bookmark</button>
                   <span className="text-xs text-gray-500">{getViews(article.url)} views</span>
@@ -294,6 +299,7 @@ export default function Home() {
             <ArrowRight />
           </button>
         </div>)}
+      {selectedArticle && <Summarizer article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
     </div>
   );
 }
