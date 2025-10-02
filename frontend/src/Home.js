@@ -11,6 +11,7 @@ import { MdSearchOff } from "react-icons/md";
 import Summarizer from './Summarizer';
 
 
+
 const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [error, setError] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [views, setViews] = useState({});
 
 
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
@@ -75,6 +77,8 @@ export default function Home() {
     setBookmarks(storedBookmarks);
     const storedSearchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
     setSearchHistory(storedSearchHistory);
+    const storedViews = JSON.parse(localStorage.getItem('views') || '{}');
+    setViews(storedViews);
   }, []);
 
   useEffect(() => {
@@ -136,13 +140,15 @@ export default function Home() {
   };
 
   const handleView = (url) => {
-    const views = JSON.parse(localStorage.getItem('views') || '{}');
-    views[url] = (views[url] || 0) + 1;
-    localStorage.setItem('views', JSON.stringify(views));
+    setViews(prev => {
+      const newViews = { ...prev };
+      newViews[url] = (newViews[url] || 0) + 1;
+      localStorage.setItem('views', JSON.stringify(newViews));
+      return newViews;
+    });
   };
 
   const getViews = (url) => {
-    const views = JSON.parse(localStorage.getItem('views') || '{}');
     return views[url] || 0;
   };
 
@@ -194,8 +200,8 @@ export default function Home() {
               <option value="gb">UK</option>
               <option value="ca">Canada</option>
               <option value="au">Australia</option>
-              <option value="de">Germany</option>
-              <option value="fr">France</option>
+              {/* <option value="de">Germany</option> */}
+              {/* <option value="fr">France</option> */}
               <option value="it">Italy</option>
               <option value="es">Spain</option>
               <option value="jp">Japan</option>
@@ -266,7 +272,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
             {news.slice(0, 10).map((article, idx) => (
               <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col">
-                {article.image && <img src={article.image} alt="News" className="rounded w-auto h-70 object-cover" />}
+                {article.image && <img src={article.image} alt="News" className="rounded w-auto h-50 object-cover" />}
                 <h2 className="font-serif text-md mt-2 flex-grow text-white">{article.title}</h2>
                 <p className="text-sm mt-1 text-gray-600 dark:text-gray-400 font-serif">{article.description?.substring(0, 100)}...</p>
                 <div className="mt-2">
