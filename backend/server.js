@@ -44,6 +44,13 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
+// View Schema for global article views
+const ViewSchema = new mongoose.Schema({
+  url: { type: String, required: true, unique: true },
+  count: { type: Number, default: 0 }
+});
+const View = mongoose.model('View', ViewSchema);
+
 // Registration endpoint
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
@@ -124,6 +131,33 @@ app.post('/api/summarize', async (req, res) => {
     res.json({ summary });
   } catch (error) {
     res.status(500).json({ error: 'Failed to generate summary' });
+  }
+});
+
+// Get all views
+app.get('/api/views', async (req, res) => {
+  try {
+    const allViews = await View.find({});
+    const viewsObj = {};
+    allViews.forEach(v => viewsObj[v.url] = v.count);
+    res.json({ views: viewsObj });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch views' });
+  }
+});
+
+// Increment view for a specific URL
+app.post('/api/views/:url', async (req, res) => {
+  const url = decodeURIComponent(req.params.url);
+  try {
+    const viewDoc = await View.findOneAndUpdate(
+      { url },
+      { $inc: { count: 1 } },
+      { new: true, upsert: true }
+    );
+    res.json({ count: viewDoc.count });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to increment view' });
   }
 });
 

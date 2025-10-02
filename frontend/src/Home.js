@@ -46,6 +46,8 @@ export default function Home() {
       const res = await axios.get(url);
       setNews(Array.isArray(res.data.articles) ? res.data.articles : []);
       setError(false);
+      // Load fresh views data
+      await loadViews();
 
       if (searchQuery.trim() && !searchHistory.includes(searchQuery.trim())) {
         const updatedHistory = [searchQuery.trim(), ...searchHistory.slice(0, 9)];
@@ -78,27 +80,18 @@ export default function Home() {
     const storedSearchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
     setSearchHistory(storedSearchHistory);
 
-    // IndexedDB for views
-    const loadViews = () => {
-      const request = indexedDB.open('newsViews', 1);
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains('views')) {
-          db.createObjectStore('views');
-        }
-      };
-      request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction(['views'], 'readonly');
-        const store = transaction.objectStore('views');
-        const getRequest = store.get('views');
-        getRequest.onsuccess = () => {
-          setViews(getRequest.result || {});
-        };
-      };
-    };
+    // Load views from server
     loadViews();
   }, []);
+
+  const loadViews = async () => {
+    try {
+      const response = await axios.get('https://the-news-ledger.onrender.com/api/views');
+      setViews(response.data.views || {});
+    } catch (error) {
+      console.error('Failed to load views:', error);
+    }
+  };
 
   useEffect(() => {
     if (transcript && !listening) {
@@ -158,29 +151,16 @@ export default function Home() {
     setBookmarks(updatedBookmarks);
   };
 
-  const handleView = (url) => {
+  const handleView = async (url) => {
     try {
-      const request = indexedDB.open('newsViews', 1);
-      request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction(['views'], 'readwrite');
-        const store = transaction.objectStore('views');
-        const getRequest = store.get('views');
-        getRequest.onsuccess = () => {
-          const currentViews = getRequest.result || {};
-          const newViews = { ...currentViews };
-          newViews[url] = (newViews[url] || 0) + 1;
-          const putRequest = store.put(newViews, 'views');
-          putRequest.onsuccess = () => {
-            setViews(newViews);
-          };
-          putRequest.onerror = () => {
-            console.log('Quota exceeded, not incrementing views');
-          };
-        };
-      };
+      const response = await axios.post(`https://the-news-ledger.onrender.com/api/views/${encodeURIComponent(url)}`);
+      // Update local state with the new count
+      setViews(prev => ({
+        ...prev,
+        [url]: response.data.count
+      }));
     } catch (error) {
-      console.log('IndexedDB error, not incrementing views:', error);
+      console.error('Failed to increment view:', error);
     }
   };
 
