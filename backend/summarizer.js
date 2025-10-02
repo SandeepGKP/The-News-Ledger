@@ -13,7 +13,7 @@ const summarizeText = async (text) => {
           content: `Summarize the following news article in 2-3 sentences: ${text}`,
         },
       ],
-      model: 'llama3-8b-8192',
+      model: 'llama3-70b-8192',
       temperature: 0.5,
       max_tokens: 1024,
       top_p: 1,
