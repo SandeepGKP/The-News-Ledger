@@ -4,7 +4,18 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const summarizeText = async (text) => {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // Log available models
+    console.log('Available models:');
+    try {
+      const models = await genAI.listModels();
+      models.forEach(model => {
+        console.log(model.name);
+      });
+    } catch (listError) {
+      console.error('Error listing models:', listError);
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.0-pro' });
     const prompt = `Summarize the following news article in 2-3 sentences: ${text}`;
     const result = await model.generateContent(prompt);
     const response = result.response;
