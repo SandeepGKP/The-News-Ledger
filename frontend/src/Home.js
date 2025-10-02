@@ -77,8 +77,27 @@ export default function Home() {
     setBookmarks(storedBookmarks);
     const storedSearchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
     setSearchHistory(storedSearchHistory);
-    const storedViews = JSON.parse(localStorage.getItem('views') || '{}');
-    setViews(storedViews);
+
+    // IndexedDB for views
+    const loadViews = () => {
+      const request = indexedDB.open('newsViews', 1);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains('views')) {
+          db.createObjectStore('views');
+        }
+      };
+      request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction(['views'], 'readonly');
+        const store = transaction.objectStore('views');
+        const getRequest = store.get('views');
+        getRequest.onsuccess = () => {
+          setViews(getRequest.result || {});
+        };
+      };
+    };
+    loadViews();
   }, []);
 
   useEffect(() => {
@@ -140,12 +159,29 @@ export default function Home() {
   };
 
   const handleView = (url) => {
-    setViews(prev => {
-      const newViews = { ...prev };
-      newViews[url] = (newViews[url] || 0) + 1;
-      localStorage.setItem('views', JSON.stringify(newViews));
-      return newViews;
-    });
+    try {
+      const request = indexedDB.open('newsViews', 1);
+      request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction(['views'], 'readwrite');
+        const store = transaction.objectStore('views');
+        const getRequest = store.get('views');
+        getRequest.onsuccess = () => {
+          const currentViews = getRequest.result || {};
+          const newViews = { ...currentViews };
+          newViews[url] = (newViews[url] || 0) + 1;
+          const putRequest = store.put(newViews, 'views');
+          putRequest.onsuccess = () => {
+            setViews(newViews);
+          };
+          putRequest.onerror = () => {
+            console.log('Quota exceeded, not incrementing views');
+          };
+        };
+      };
+    } catch (error) {
+      console.log('IndexedDB error, not incrementing views:', error);
+    }
   };
 
   const getViews = (url) => {
