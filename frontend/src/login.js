@@ -22,7 +22,6 @@ const Login = ({ onLogin }) => {
       if (onLogin) {
         onLogin(res.data); // ✅ update parent/auth state immediately
       }
-
       navigate('/home');
     } catch (err) {
       console.error("Login failed: ", err);
