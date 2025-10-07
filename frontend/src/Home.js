@@ -14,6 +14,10 @@ import Summarizer from './Summarizer';
 
 const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
+const CircularLoader = () => (
+  <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+);
+
 export default function Home() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +33,8 @@ export default function Home() {
   const [error, setError] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [views, setViews] = useState({});
+  // const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoading, setImageLoading] = useState(new Map());
 
 
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
@@ -44,7 +50,9 @@ export default function Home() {
       }
 
       const res = await axios.get(url);
-      setNews(Array.isArray(res.data.articles) ? res.data.articles : []);
+      const articles = Array.isArray(res.data.articles) ? res.data.articles : [];
+      setNews(articles);
+      setImageLoading(new Map(articles.slice(0, 10).map(article => [article.url, true]))); // Always start with true for loader
       setError(false);
       // Load fresh views data
       await loadViews();
@@ -288,8 +296,23 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
             {news.slice(0, 10).map((article, idx) => (
               <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col">
-                {article.image && <img src={article.image} alt="News" className="rounded w-auto h-50 object-cover" />}
-                <h2 className="font-serif text-md mt-2 flex-grow text-white">{article.title}</h2>
+                <div className="h-50 w-full relative bg-gray-100 dark:bg-gray-700 rounded">
+                  {article.image && (
+                    <img
+                      src={article.image}
+                      alt="News"
+                      className="rounded w-auto h-50 object-cover"
+                      onLoad={() => setImageLoading(prev => new Map(prev).set(article.url, false))}
+                      onError={() => setImageLoading(prev => new Map(prev).set(article.url, false))}
+                    />
+                  )}
+                  {imageLoading.get(article.url) && (
+                    <div className="h-[50vh] w-full  inset-0 flex justify-center items-center">
+                      <CircularLoader />
+                    </div>
+                  )}
+                </div>
+                <h2 className="font-serif text-md mt- flex-grow text-white">{article.title}</h2>
                 <p className="text-sm mt-1 text-gray-600 dark:text-gray-400 font-serif">{article.description?.substring(0, 100)}...</p>
                 <div className="mt-2">
                   <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 inline-block text-sm" onClick={() => handleView(article.url)}>Read More</a>

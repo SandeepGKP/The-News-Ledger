@@ -51,10 +51,8 @@ function App() {
     localStorage.removeItem('isLoggedIn'); // Ensure isLoggedIn is also removed on logout
     navigate('/login'); // Use navigate instead of window.location.href
   };
-  const token = localStorage.getItem('token');
-  if(token){
-    navigate('/home');
-  }
+
+  
   useEffect(() => {
     if (username) { // This will now correctly fire when username is set
       socket.emit('userLoggedIn', username);
