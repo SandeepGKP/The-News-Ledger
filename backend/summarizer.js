@@ -1,7 +1,5 @@
 const Groq = require('groq-sdk');
 
-console.log('GROQ_API_KEY:', process.env.GROQ_API_KEY); // Debug log
-
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
@@ -15,7 +13,7 @@ const summarizeText = async (text) => {
           content: `Summarize the following news article in 2-3 sentences: ${text}`,
         },
       ],
-      model: 'gemma2-9b-it',
+      model: 'llama3-8b-8192',
       temperature: 0.5,
       max_tokens: 1024,
       top_p: 1,
