@@ -316,7 +316,7 @@ export default function Home() {
                 <p className="text-sm mt-1 text-gray-600 dark:text-gray-400 font-serif">{article.description?.substring(0, 100)}...</p>
                 <div className="mt-2">
                   <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 inline-block text-sm" onClick={() => handleView(article.url)}>Read More</a>
-                  <button onClick={() => setSelectedArticle(article)} className="text-green-500 ml-4 inline-block text-sm">Summarize</button>
+                  {/* <button onClick={() => setSelectedArticle(article)} className="text-green-500 ml-4 inline-block text-sm">Summarize</button> */}
                 </div>
                 <div className="flex justify-between items-center mt-2">
                   <button onClick={() => handleBookmark(article)} className="text-sm text-yellow-500">Bookmark</button>
